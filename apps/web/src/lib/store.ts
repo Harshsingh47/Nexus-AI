@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SUBSCRIPTION_TIERS_CONFIG, SubscriptionPlanTier, AgentConfig, RAGDocument, LLMProvider, AgentRoleType } from '@nexusmind/shared';
+import { SUBSCRIPTION_TIERS_CONFIG, SubscriptionPlanTier, AgentConfig, RAGDocument } from '@nexusmind/shared';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -57,10 +57,10 @@ const DEFAULT_AGENTS: AgentConfig[] = [
   {
     id: 'agent-101',
     name: 'Orchestrator Manager Agent',
-    role: AgentRoleType.ORCHESTRATOR,
+    role: 'ORCHESTRATOR' as any,
     description: 'Decomposes complex natural language prompts into sub-tasks and delegates to specialist workers.',
     systemPrompt: 'You are the Master Orchestrator. Analyze incoming user goals and dispatch tasks.',
-    provider: LLMProvider.OPENAI,
+    provider: 'OPENAI' as any,
     model: 'gpt-4o',
     temperature: 0.7,
     tools: ['CANVAS_BUILDER', 'DELEGATION'],
@@ -71,10 +71,10 @@ const DEFAULT_AGENTS: AgentConfig[] = [
   {
     id: 'agent-102',
     name: 'Playwright Browser Scraper Agent',
-    role: AgentRoleType.RESEARCHER,
+    role: 'RESEARCHER' as any,
     description: 'Autonomous headless browser worker powered by Playwright to crawl DOM elements and extract web content.',
     systemPrompt: 'Execute web research. Extract structured tabular data from target URLs.',
-    provider: LLMProvider.ANTHROPIC,
+    provider: 'ANTHROPIC' as any,
     model: 'claude-3-5-sonnet-20240620',
     temperature: 0.3,
     tools: ['PLAYWRIGHT_BROWSER', 'DOM_PARSER'],
@@ -85,10 +85,10 @@ const DEFAULT_AGENTS: AgentConfig[] = [
   {
     id: 'agent-103',
     name: 'Python Code Sandbox Specialist',
-    role: AgentRoleType.DEVELOPER,
+    role: 'DEVELOPER' as any,
     description: 'Executes Python data analysis, transformations, CSV parsing, and mathematical modeling safely in an isolated sandbox.',
     systemPrompt: 'Write clean Python code to execute data analysis.',
-    provider: LLMProvider.GROQ,
+    provider: 'GROQ' as any,
     model: 'llama-3.1-70b-versatile',
     temperature: 0.2,
     tools: ['CODE_SANDBOX', 'PYTHON_INTERPRETER'],
@@ -99,10 +99,10 @@ const DEFAULT_AGENTS: AgentConfig[] = [
   {
     id: 'agent-104',
     name: 'DevSecOps & Compliance Auditor',
-    role: AgentRoleType.SECURITY_AUDITOR,
+    role: 'SECURITY_AUDITOR' as any,
     description: 'Scans workflow step outputs for secret leaks, PII compliance, and cryptographic integrity.',
     systemPrompt: 'Audit code and data outputs for security vulnerabilities and secret leaks.',
-    provider: LLMProvider.OPENAI,
+    provider: 'OPENAI' as any,
     model: 'gpt-4o',
     temperature: 0.1,
     tools: ['VAULT_CHECKER', 'AUDIT_LOG'],
