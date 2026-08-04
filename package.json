@@ -1,0 +1,24 @@
+{
+  "name": "nexusmind-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise Autonomous AI Agent & Workflow Platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:server": "npm --prefix apps/server run start:dev",
+    "build:shared": "npm --prefix packages/shared run build",
+    "build:sdk": "npm --prefix packages/agent-sdk run build",
+    "build:web": "npm --prefix apps/web run build",
+    "build:server": "npm --prefix apps/server run build",
+    "build": "npm run build:shared && npm run build:sdk && npm run build:server && npm run build:web",
+    "test": "npm --prefix apps/server run test",
+    "test:e2e": "npm --prefix apps/server run test:e2e"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

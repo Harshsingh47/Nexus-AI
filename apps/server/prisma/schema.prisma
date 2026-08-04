@@ -1,0 +1,232 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ORG_ADMIN
+  DEVELOPER
+  MEMBER
+  VIEWER
+}
+
+enum PlanTier {
+  FREE
+  WEEKLY
+  MONTHLY
+  YEARLY
+  ENTERPRISE
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  AWAITING_APPROVAL
+  CANCELLED
+}
+
+model User {
+  id                String       @id @default(uuid())
+  email             String       @unique
+  passwordHash      String?
+  fullName          String
+  avatarUrl         String?
+  role              Role         @default(MEMBER)
+  mfaEnabled        Boolean      @default(false)
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  subscriptions     Subscription[]
+  creditAccounts    CreditAccount[]
+  creditTx          CreditTransaction[]
+  agents            Agent[]
+  workflows         Workflow[]
+  executions        Execution[]
+  documents         Document[]
+  auditLogs         AuditLog[]
+  apiKeys           ApiKey[]
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  teams       Team[]
+  agents      Agent[]
+  workflows   Workflow[]
+}
+
+model Team {
+  id             String       @id @default(uuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+}
+
+model Subscription {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  planTier          PlanTier @default(FREE)
+  stripeCustomerId  String?
+  stripeSubId       String?
+  status            String   @default("active")
+  creditsAllocated  Int      @default(50)
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CreditAccount {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  balance            Int      @default(50)
+  dailyFreeCredit    Int      @default(50)
+  lastDailyResetDate String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Int      // positive for top-up, negative for execution cost
+  reason      String
+  executionId String?
+  createdAt   DateTime @default(now())
+}
+
+model Agent {
+  id                   String   @id @default(uuid())
+  name                 String
+  role                 String
+  description          String
+  systemPrompt         String   @db.Text
+  provider             String   @default("OPENAI")
+  model                String   @default("gpt-4o")
+  temperature          Float    @default(0.7)
+  tools                String[] // JSON string list of enabled tools
+  maxIterations        Int      @default(10)
+  memoryEnabled        Boolean  @default(true)
+  humanApprovalRequired Boolean @default(false)
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  organizationId       String?
+  organization         Organization? @relation(fields: [organizationId], references: [id])
+  isPublic             Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  memories             Memory[]
+}
+
+model Workflow {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  graphJson      String   @db.Text // ReactFlow graph JSON (nodes & edges)
+  isTemplate     Boolean  @default(false)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  executions     Execution[]
+}
+
+model Execution {
+  id             String          @id @default(uuid())
+  workflowId     String?
+  workflow       Workflow?       @relation(fields: [workflowId], references: [id])
+  userId         String
+  user           User            @relation(fields: [userId], references: [id])
+  status         ExecutionStatus @default(PENDING)
+  inputData      String          @db.Text
+  outputData     String?         @db.Text
+  totalTokens    Int             @default(0)
+  creditsConsumed Int            @default(0)
+  durationMs     Int             @default(0)
+  createdAt      DateTime        @default(now())
+  completedAt    DateTime?
+
+  steps          ExecutionStep[]
+}
+
+model ExecutionStep {
+  id              String   @id @default(uuid())
+  executionId     String
+  execution       Execution @relation(fields: [executionId], references: [id])
+  nodeId          String?
+  agentName       String
+  action          String
+  input           String   @db.Text
+  output          String   @db.Text
+  reasoning       String   @db.Text
+  status          String   @default("SUCCESS")
+  tokensUsed      Int      @default(0)
+  creditsConsumed Int      @default(0)
+  durationMs      Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+model Memory {
+  id         String   @id @default(uuid())
+  agentId    String?
+  agent      Agent?   @relation(fields: [agentId], references: [id])
+  userId     String?
+  type       String   // SHORT_TERM, LONG_TERM, SEMANTIC, WORKING
+  content    String   @db.Text
+  metadata   String?  @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  name           String
+  fileType       String
+  sizeBytes      Int
+  storagePath    String
+  vectorDbStatus String   @default("READY")
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  resource  String
+  ipAddress String?
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  keyHash   String   @unique
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

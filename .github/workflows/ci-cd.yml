@@ -1,0 +1,42 @@
+name: NexusMind Enterprise CI/CD Automation Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Monorepo Dependencies
+        run: npm install
+
+      - name: Build Shared Packages & SDK
+        run: |
+          npm run build:shared
+          npm run build:sdk
+
+      - name: Run Backend Unit & Integration Tests
+        run: npm run test
+
+      - name: Build Production Next.js App & NestJS Core
+        run: |
+          npm run build:server
+          npm run build:web
+
+      - name: Build & Push Docker Images (Demo Container Registry)
+        run: |
+          echo "Building Docker containers for NestJS server and Next.js web application"
+          docker build -t nexusmind/server:latest -f docker/Dockerfile.server .
+          docker build -t nexusmind/web:latest -f docker/Dockerfile.web .
