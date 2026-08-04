@@ -14,6 +14,8 @@ import {
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
 export default function KnowledgePage() {
   const { documents, fetchDocuments, addDocument } = useAppStore();
   const [query, setQuery] = useState('');
@@ -38,13 +40,13 @@ export default function KnowledgePage() {
     };
 
     try {
-      await fetch('http://localhost:4000/api/rag/upload', {
+      await fetch(`${API_BASE}/rag/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDoc)
       }).catch(() => null);
 
-      addDocument(newDoc); // Dynamic state update
+      addDocument(newDoc);
     } catch (e) {
       console.error(e);
     } finally {
@@ -55,7 +57,7 @@ export default function KnowledgePage() {
   const handleVectorQuery = async () => {
     if (!query.trim()) return;
     try {
-      const res = await fetch('http://localhost:4000/api/rag/query', {
+      const res = await fetch(`${API_BASE}/rag/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -71,7 +73,7 @@ export default function KnowledgePage() {
             documentName: 'Enterprise_AI_Architecture_Spec.pdf',
             chunkId: 'chunk-42',
             similarityScore: 0.94,
-            textSnippet: `Section 4.2: AI Agent memory state is synchronized across microservices using high-performance vector search (pgvector/Qdrant) and Redis pub/sub execution streams.`
+            textSnippet: `Section 4.2: AI Agent memory state is synchronized across microservices using vector search and Redis pub/sub execution streams.`
           }
         ]
       });

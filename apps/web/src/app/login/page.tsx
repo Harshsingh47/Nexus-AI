@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Zap, Mail, Lock, Sparkles, ArrowRight, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Zap, Mail, Lock, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/auth/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email || 'admin@nexusmind.ai', password })
@@ -53,7 +55,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const mockProfile = { email: 'user.google@nexusmind.ai', name: 'Google Enterprise User' };
-      const res = await fetch('http://localhost:4000/api/auth/google', {
+      const res = await fetch(`${API_BASE}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: 'google-oauth-token', profile: mockProfile })
@@ -74,7 +76,7 @@ export default function LoginPage() {
     if (!email) return;
     setLoading(true);
     try {
-      await fetch('http://localhost:4000/api/auth/magic-link', {
+      await fetch(`${API_BASE}/auth/magic-link`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -89,12 +91,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4 -ml-64 relative overflow-hidden">
-      {/* Background glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
 
       <div className="w-full max-w-md p-8 rounded-3xl glass-panel border border-slate-800 space-y-6 shadow-2xl bg-dark-950/90">
-        {/* Brand */}
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
             <Zap className="w-6 h-6 text-white" />
@@ -103,7 +102,6 @@ export default function LoginPage() {
           <p className="text-xs text-slate-400">Enterprise Autonomous AI Agent Platform</p>
         </div>
 
-        {/* Auth Mode Toggle */}
         <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold">
           <button
             onClick={() => setAuthMode('PASSWORD')}
@@ -119,7 +117,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* 1-Click Google OAuth */}
         <button
           type="button"
           onClick={handleGoogleLogin}
@@ -141,7 +138,6 @@ export default function LoginPage() {
           <div className="flex-grow border-t border-slate-800"></div>
         </div>
 
-        {/* Forms */}
         {authMode === 'PASSWORD' ? (
           <form onSubmit={handleLogin} className="space-y-4">
             <div>

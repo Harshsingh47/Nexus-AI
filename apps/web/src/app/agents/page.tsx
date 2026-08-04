@@ -6,12 +6,13 @@ import {
   Plus, 
   Sparkles, 
   Cpu,
-  Trash2,
-  AlertCircle
+  Trash2
 } from 'lucide-react';
 import { LLMProvider, AgentRoleType } from '@nexusmind/shared';
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function AgentsPage() {
   const { agents, fetchAgents, addAgent, deleteAgent } = useAppStore();
@@ -42,13 +43,13 @@ export default function AgentsPage() {
     };
 
     try {
-      await fetch('http://localhost:4000/api/agents', {
+      await fetch(`${API_BASE}/agents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAgent)
       }).catch(() => null);
 
-      addAgent(newAgent); // Dynamic state update
+      addAgent(newAgent);
       setIsCreating(false);
       setNewAgentName('');
       setNewAgentPrompt('');

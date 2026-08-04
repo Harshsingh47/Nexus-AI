@@ -6,25 +6,30 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = process.env.FRONTEND_URL 
+    ? [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://nexus-ai-web.vercel.app']
+    : '*';
+
   app.enableCors({
-    origin: '*',
-    credentials: true
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   });
 
-  // Set global API prefix but exclude root '/' so health check works at https://domain.com/
   app.setGlobalPrefix('api', { exclude: ['/'] });
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
-      forbidNonWhitelisted: false
+      forbidNonWhitelisted: true
     })
   );
 
   const config = new DocumentBuilder()
     .setTitle('NexusMind AI - Enterprise Autonomous Agent Platform API')
-    .setDescription('REST & GraphQL API for Multi-Agent Orchestration, Workflow Engine, RAG Knowledge Base, Playwright Automation, and Subscription Credit Metering.')
+    .setDescription('REST & WebSocket API for Multi-Agent Orchestration, Workflow Engine, RAG Knowledge Base, Playwright Automation, and Credit Metering.')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();
@@ -34,7 +39,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  console.log(`🚀 NexusMind Enterprise Server running on http://localhost:${port}`);
-  console.log(`📚 OpenAPI / Swagger Documentation available on http://localhost:${port}/api/docs`);
+  console.log(`🚀 NexusMind Server running on port ${port}`);
 }
 bootstrap();

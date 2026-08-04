@@ -11,6 +11,8 @@ import { SUBSCRIPTION_TIERS_CONFIG, SubscriptionPlanTier } from '@nexusmind/shar
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
 export default function BillingPage() {
   const { credits, activePlan, setPlan } = useAppStore();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export default function BillingPage() {
   const handleSubscribe = async (tier: SubscriptionPlanTier) => {
     setLoadingTier(tier);
     try {
-      await fetch('http://localhost:4000/api/billing/subscribe', {
+      await fetch(`${API_BASE}/billing/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planTier: tier })

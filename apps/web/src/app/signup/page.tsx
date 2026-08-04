@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Zap, Mail, Lock, User, Building2, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { Zap, Mail, Lock, User, Building2, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/auth/register', {
+      const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, fullName })

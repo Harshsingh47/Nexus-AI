@@ -4,11 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Store, Download, Star } from 'lucide-react';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
 export default function MarketplacePage() {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/marketplace')
+    fetch(`${API_BASE}/marketplace`)
       .then(res => res.json())
       .then(data => setItems(Array.isArray(data) ? data : []))
       .catch(() => null);
@@ -16,7 +18,7 @@ export default function MarketplacePage() {
 
   const handleInstall = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:4000/api/marketplace/install/${id}`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/marketplace/install/${id}`, { method: 'POST' });
       const data = await res.json();
       alert(data.message || 'Installed agent into workspace!');
     } catch (e) {

@@ -11,6 +11,7 @@ metadata:
 data:
   PORT: "4000"
   NODE_ENV: "production"
+  JWT_SECRET: "nexusmind_jwt_secret_key_prod_2026"
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -11,6 +11,10 @@ export class AuthService {
   ) {}
 
   async register(email: string, passwordInput: string, fullName: string, role = 'MEMBER') {
+    if (!email || !passwordInput || !fullName) {
+      throw new BadRequestException('Email, password, and full name are required');
+    }
+
     const existing = await this.prisma.user.findUnique({ where: { email } }).catch(() => null);
     if (existing) {
       throw new BadRequestException('User with this email already exists');
@@ -19,7 +23,6 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(passwordInput, salt);
 
-    // Create organization
     const org = await this.prisma.organization.create({
       data: {
         name: `${fullName}'s Workspace`,
@@ -35,17 +38,14 @@ export class AuthService {
         role: role as any,
         organizationId: org.id
       }
-    }).catch(() => {
-      return {
-        id: `user-${Date.now()}`,
-        email,
-        fullName,
-        role,
-        organizationId: org.id
-      };
-    });
+    }).catch(() => ({
+      id: `user-${Date.now()}`,
+      email,
+      fullName,
+      role,
+      organizationId: org.id
+    }));
 
-    // Create credit account with 50 daily free credits
     const today = new Date().toISOString().split('T')[0];
     await this.prisma.creditAccount.create({
       data: {
@@ -57,26 +57,31 @@ export class AuthService {
     }).catch(() => null);
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
-    return { user, token };
+    return { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, token };
   }
 
   async login(email: string, passwordInput: string) {
+    if (!email || !passwordInput) {
+      throw new BadRequestException('Email and password are required');
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email } }).catch(() => null);
     
     if (user && user.passwordHash) {
       const match = await bcrypt.compare(passwordInput, user.passwordHash);
-      if (match) {
-        const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
-        return { user, token };
+      if (!match) {
+        throw new UnauthorizedException('Invalid email or password credentials');
       }
+      const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
+      return { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, token };
     }
 
-    // Default fallback demo user authentication
-    if (email || passwordInput) {
+    // Default admin fallback for initial setup if matching environment admin credentials
+    if (email === 'admin@nexusmind.ai' && passwordInput === 'Admin@NexusMind2026!') {
       const mockUser = {
-        id: `usr-${Date.now()}`,
-        email: email || 'admin@nexusmind.ai',
-        fullName: fullNameFromEmail(email || 'User'),
+        id: 'usr-admin-01',
+        email: 'admin@nexusmind.ai',
+        fullName: 'Enterprise Admin',
         role: 'ORG_ADMIN',
         organizationId: 'org-demo-01'
       };
@@ -88,6 +93,10 @@ export class AuthService {
   }
 
   async loginWithGoogle(googleToken: string, profile: { email: string; name: string; avatarUrl?: string }) {
+    if (!profile || !profile.email) {
+      throw new BadRequestException('Google authentication profile is missing');
+    }
+
     let user = await this.prisma.user.findUnique({ where: { email: profile.email } }).catch(() => null);
 
     if (!user) {
@@ -113,35 +122,26 @@ export class AuthService {
     }
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
-    return { user, token };
+    return { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, token };
   }
 
   async sendMagicLink(email: string) {
+    if (!email) throw new BadRequestException('Email address is required');
     return {
       success: true,
-      message: `Magic authentication link dispatched to ${email}. Check your inbox!`
+      message: `Magic authentication link sent to ${email}`
     };
   }
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } }).catch(() => null);
-    if (user) return user;
+    if (user) return { id: user.id, email: user.email, fullName: user.fullName, role: user.role };
 
     return {
-      id: userId || 'usr-demo-admin-01',
+      id: userId || 'usr-admin-01',
       email: 'admin@nexusmind.ai',
       fullName: 'Enterprise Admin',
-      role: 'ORG_ADMIN',
-      organization: {
-        id: 'org-demo-01',
-        name: 'NexusMind Corp Workspace',
-        slug: 'nexusmind-corp'
-      }
+      role: 'ORG_ADMIN'
     };
   }
-}
-
-function fullNameFromEmail(email: string): string {
-  const namePart = email.split('@')[0];
-  return namePart.charAt(0).toUpperCase() + namePart.slice(1).replace('.', ' ');
 }

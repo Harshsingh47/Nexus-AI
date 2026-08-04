@@ -22,6 +22,8 @@ import {
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
 export default function BuilderPage() {
   const { deductCredits, addLogStep } = useAppStore();
   const [promptText, setPromptText] = useState('');
@@ -56,7 +58,7 @@ export default function BuilderPage() {
     if (!promptText.trim()) return;
     setIsGenerating(true);
     try {
-      const res = await fetch('http://localhost:4000/api/agents/generate-from-prompt', {
+      const res = await fetch(`${API_BASE}/agents/generate-from-prompt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: promptText })
@@ -84,7 +86,7 @@ export default function BuilderPage() {
     deductCredits(2);
 
     try {
-      const res = await fetch('http://localhost:4000/api/workflows/wf-demo-01/execute', {
+      const res = await fetch(`${API_BASE}/workflows/wf-demo-01/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inputData: { nodes } })
@@ -133,8 +135,8 @@ export default function BuilderPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>Interactive Workflow & Agent Canvas</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Interactive Topology</span>
+              <span>Interactive Workflow Canvas</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Interactive Preview</span>
             </h1>
             <p className="text-xs text-slate-400">Click palette nodes to add, remove nodes, or generate via natural language prompt</p>
           </div>
@@ -213,7 +215,7 @@ export default function BuilderPage() {
         {/* Center Workflow Graph Visual Area */}
         <div className="flex-1 rounded-2xl glass-panel border border-slate-800 p-6 relative overflow-auto bg-dark-950/90 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-400 font-mono">Interactive Workflow Topology ({nodes.length} Nodes)</span>
+            <span className="text-xs text-slate-400 font-mono">Workflow Canvas Preview ({nodes.length} Nodes)</span>
             <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
               <Coins className="w-3.5 h-3.5 text-amber-400" />
               <span>Est. Cost: 2 Credits</span>

@@ -35,8 +35,7 @@ jobs:
           npm run build:server
           npm run build:web
 
-      - name: Build & Push Docker Images (Demo Container Registry)
+      - name: Build Docker Container Images
         run: |
-          echo "Building Docker containers for NestJS server and Next.js web application"
-          docker build -t nexusmind/server:latest -f docker/Dockerfile.server .
-          docker build -t nexusmind/web:latest -f docker/Dockerfile.web .
+          docker build -t nexusmind/server:${{ github.sha }} -f docker/Dockerfile.server .
+          docker build -t nexusmind/web:${{ github.sha }} -f docker/Dockerfile.web .
