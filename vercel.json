@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/server/src/main.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["packages/shared/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/server/src/main.ts"
+    }
+  ]
+}
