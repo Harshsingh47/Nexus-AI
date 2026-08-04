@@ -16,6 +16,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@nexusmind/shared": ["../../packages/shared/src/index.ts"],
+      "@nexusmind/shared/*": ["../../packages/shared/src/*"]
+    }
   }
 }
