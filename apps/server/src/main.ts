@@ -11,7 +11,8 @@ async function bootstrap() {
     credentials: true
   });
 
-  app.setGlobalPrefix('api');
+  // Set global API prefix but exclude root '/' so health check works at https://domain.com/
+  app.setGlobalPrefix('api', { exclude: ['/'] });
 
   app.useGlobalPipes(
     new ValidationPipe({
