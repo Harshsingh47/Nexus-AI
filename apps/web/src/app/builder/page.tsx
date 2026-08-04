@@ -16,7 +16,8 @@ import {
   ArrowRight,
   CheckCircle2,
   RefreshCw,
-  Coins
+  Coins,
+  X
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
@@ -29,11 +30,11 @@ export default function BuilderPage() {
   const [executionResult, setExecutionResult] = useState<any>(null);
 
   const [nodes, setNodes] = useState<any[]>([
-    { id: '1', label: 'Trigger Event', type: 'TRIGGER', icon: GitFork, pos: { x: 50, y: 150 }, status: 'READY' },
-    { id: '2', label: 'Playwright Web Crawler', type: 'BROWSER', icon: Globe, pos: { x: 280, y: 150 }, status: 'READY' },
-    { id: '3', label: 'Claude 3.5 Sonnet Analysis', type: 'LLM', icon: Bot, pos: { x: 540, y: 150 }, status: 'READY' },
-    { id: '4', label: 'Python Data Processing', type: 'PYTHON', icon: Code, pos: { x: 800, y: 150 }, status: 'READY' },
-    { id: '5', label: 'Store in RAG Knowledge Base', type: 'RAG', icon: Database, pos: { x: 1050, y: 150 }, status: 'READY' }
+    { id: '1', label: 'Trigger Event', type: 'TRIGGER', icon: GitFork, status: 'READY' },
+    { id: '2', label: 'Playwright Web Scraper', type: 'BROWSER', icon: Globe, status: 'READY' },
+    { id: '3', label: 'Claude 3.5 Sonnet Analysis', type: 'LLM', icon: Bot, status: 'READY' },
+    { id: '4', label: 'Python Data Processing', type: 'PYTHON', icon: Code, status: 'READY' },
+    { id: '5', label: 'Store in RAG Knowledge Base', type: 'RAG', icon: Database, status: 'READY' }
   ]);
 
   const paletteNodes = [
@@ -46,6 +47,10 @@ export default function BuilderPage() {
     { type: 'MEMORY', label: 'Short/Long Memory', icon: BrainCircuit, color: 'text-pink-400 bg-pink-500/10' },
     { type: 'HUMAN_APPROVAL', label: 'Human Approval Gate', icon: UserCheck, color: 'text-rose-400 bg-rose-500/10' }
   ];
+
+  const removeNode = (id: string) => {
+    setNodes(prev => prev.filter(n => n.id !== id));
+  };
 
   const handlePromptGenerate = async () => {
     if (!promptText.trim()) return;
@@ -60,13 +65,13 @@ export default function BuilderPage() {
       if (data) {
         setNodes(prev => [
           ...prev,
-          { id: `${Date.now()}`, label: data.name || 'Prompt Generated Agent', type: 'LLM', icon: Bot, pos: { x: 600, y: 300 }, status: 'READY' }
+          { id: `${Date.now()}`, label: data.name || 'Prompt Generated Agent', type: 'LLM', icon: Bot, status: 'READY' }
         ]);
       }
     } catch (e) {
       setNodes(prev => [
         ...prev,
-        { id: `${Date.now()}`, label: `Agent: ${promptText.substring(0, 25)}...`, type: 'LLM', icon: Bot, pos: { x: 600, y: 300 }, status: 'READY' }
+        { id: `${Date.now()}`, label: `Agent: ${promptText.substring(0, 25)}...`, type: 'LLM', icon: Bot, status: 'READY' }
       ]);
     } finally {
       setIsGenerating(false);
@@ -95,7 +100,7 @@ export default function BuilderPage() {
         status: 'COMPLETED',
         totalCreditsConsumed: 2,
         steps: [
-          { agentName: 'Playwright Browser', action: 'Navigated to target URL', reasoning: 'Scraped DOM tree successfully', durationMs: 240, output: { status: 'SUCCESS' } },
+          { agentName: 'Playwright Web Scraper', action: 'Navigated to news.ycombinator.com', reasoning: 'Scraped DOM tree successfully', durationMs: 240, output: { status: 'SUCCESS' } },
           { agentName: 'Claude 3.5 Sonnet', action: 'Analyzed scraped data', reasoning: 'Extracted key benchmarks', durationMs: 410, output: { findings: 'High performance verified' } }
         ]
       };
@@ -111,10 +116,10 @@ export default function BuilderPage() {
       {/* Instruction Banner */}
       <InstructionBanner
         title="Visual Flow & Prompt Canvas Builder"
-        description="Build multi-step AI workflows visually by dropping nodes or using natural language instructions."
+        description="Build multi-step AI workflows visually by adding nodes or using natural language instructions."
         steps={[
           "Build via Prompt: Type a task in the top input box (e.g. 'Scrape tech news and write Python summary') and click 'Auto Build Agent'.",
-          "Drag-and-Drop: Click any node in the left Node Palette (e.g. Playwright Browser, Python Sandbox, RAG Search) to add it to the canvas.",
+          "Interactive Palette: Click any node in the left Node Palette to add it dynamically to the workflow canvas.",
           "Run Execution: Click 'Run Workflow (2 Credits)' at top right to start execution and observe live step outputs below."
         ]}
         tips="Executing a workflow consumes 2 credits and streams live step reasoning into the Observability tab!"
@@ -128,25 +133,28 @@ export default function BuilderPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>Visual Workflow & Agent Canvas</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">No-Code / Code SDK</span>
+              <span>Interactive Workflow & Agent Canvas</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Interactive Topology</span>
             </h1>
-            <p className="text-xs text-slate-400">Drag & drop workflow nodes or generate autonomously via prompt</p>
+            <p className="text-xs text-slate-400">Click palette nodes to add, remove nodes, or generate via natural language prompt</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="py-2 px-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition-all">
+          <button 
+            onClick={() => alert('Workflow topology graph saved!')}
+            className="py-2 px-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition-all"
+          >
             <Save className="w-4 h-4" />
             <span>Save Graph</span>
           </button>
           <button 
             onClick={handleRunWorkflow}
-            disabled={isRunning}
+            disabled={isRunning || nodes.length === 0}
             className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] disabled:opacity-50"
           >
             {isRunning ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-            <span>{isRunning ? 'Executing Multi-Agent Engine...' : 'Run Workflow (2 Credits)'}</span>
+            <span>{isRunning ? 'Executing Engine...' : 'Run Workflow (2 Credits)'}</span>
           </button>
         </div>
       </div>
@@ -159,7 +167,7 @@ export default function BuilderPage() {
             type="text"
             value={promptText}
             onChange={(e) => setPromptText(e.target.value)}
-            placeholder="Describe what you want the agent to do in natural language (e.g. 'Scrape product specs from website X, write a Python analysis script and send summary email')..."
+            placeholder="Describe what you want the agent to do in natural language (e.g. 'Scrape product specs from news.ycombinator.com, write a Python analysis script and send summary')..."
             className="flex-1 bg-slate-900/90 border border-slate-800 text-xs rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
           />
           <button
@@ -177,7 +185,7 @@ export default function BuilderPage() {
       <div className="flex-1 flex gap-6 min-h-[450px]">
         {/* Left Node Palette */}
         <div className="w-64 rounded-2xl glass-panel border border-slate-800 p-4 space-y-4 overflow-y-auto shrink-0">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Node Palette</h2>
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Node Palette (Click to Add)</h2>
           <div className="space-y-2">
             {paletteNodes.map((item, idx) => {
               const Icon = item.icon;
@@ -187,10 +195,10 @@ export default function BuilderPage() {
                   onClick={() => {
                     setNodes(prev => [
                       ...prev,
-                      { id: `${Date.now()}`, label: item.label, type: item.type, icon: Icon, pos: { x: 400 + prev.length * 30, y: 200 }, status: 'READY' }
+                      { id: `${Date.now()}`, label: item.label, type: item.type, icon: Icon, status: 'READY' }
                     ]);
                   }}
-                  className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:border-slate-700 cursor-pointer flex items-center gap-3 transition-all hover:translate-x-1"
+                  className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:border-blue-500/50 cursor-pointer flex items-center gap-3 transition-all hover:translate-x-1"
                 >
                   <div className={`p-2 rounded-lg ${item.color}`}>
                     <Icon className="w-4 h-4" />
@@ -205,7 +213,7 @@ export default function BuilderPage() {
         {/* Center Workflow Graph Visual Area */}
         <div className="flex-1 rounded-2xl glass-panel border border-slate-800 p-6 relative overflow-auto bg-dark-950/90 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-mono">Workflow Canvas Topology Mode</span>
+            <span className="text-xs text-slate-400 font-mono">Interactive Workflow Topology ({nodes.length} Nodes)</span>
             <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
               <Coins className="w-3.5 h-3.5 text-amber-400" />
               <span>Est. Cost: 2 Credits</span>
@@ -213,33 +221,47 @@ export default function BuilderPage() {
           </div>
 
           {/* Interactive Flow Nodes */}
-          <div className="flex flex-wrap items-center justify-center gap-4 my-auto py-8">
-            {nodes.map((node, i) => {
-              const Icon = node.icon || Bot;
-              return (
-                <React.Fragment key={node.id}>
-                  <div className="p-4 rounded-2xl glass-card border border-blue-500/30 hover:border-blue-400 w-56 space-y-2 shadow-xl bg-slate-900/90 relative group">
-                    <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
-                        <Icon className="w-4 h-4" />
+          {nodes.length === 0 ? (
+            <div className="text-center my-auto py-12 space-y-2">
+              <p className="text-slate-500 text-xs font-mono">Canvas is empty. Click nodes in the palette or type a prompt to build.</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-center gap-4 my-auto py-8">
+              {nodes.map((node, i) => {
+                const Icon = node.icon || Bot;
+                return (
+                  <React.Fragment key={node.id}>
+                    <div className="p-4 rounded-2xl glass-card border border-blue-500/30 hover:border-blue-400 w-56 space-y-2 shadow-xl bg-slate-900/90 relative group">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[9px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                            {node.type}
+                          </span>
+                          <button
+                            onClick={() => removeNode(node.id)}
+                            className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
-                      <span className="text-[9px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
-                        {node.type}
-                      </span>
+                      <h4 className="font-bold text-xs text-white">{node.label}</h4>
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-800/80">
+                        <span>Node #{i + 1}</span>
+                        <span className="text-emerald-400 font-mono">{node.status}</span>
+                      </div>
                     </div>
-                    <h4 className="font-bold text-xs text-white">{node.label}</h4>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-800/80">
-                      <span>Node #{i + 1}</span>
-                      <span className="text-emerald-400 font-mono">{node.status}</span>
-                    </div>
-                  </div>
-                  {i < nodes.length - 1 && (
-                    <ArrowRight className="w-5 h-5 text-slate-600 shrink-0 animate-pulse" />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
+                    {i < nodes.length - 1 && (
+                      <ArrowRight className="w-5 h-5 text-slate-600 shrink-0 animate-pulse" />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
 
           {/* Execution Trace Output Container */}
           {executionResult && (

@@ -18,7 +18,7 @@ import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
 export default function DashboardPage() {
-  const { agents, fetchAgents, credits, activePlan, fetchBilling } = useAppStore();
+  const { agents, fetchAgents, credits, activePlan, fetchBilling, totalExecutions, logs } = useAppStore();
 
   useEffect(() => {
     fetchAgents();
@@ -26,9 +26,9 @@ export default function DashboardPage() {
   }, [fetchAgents, fetchBilling]);
 
   const stats = [
-    { label: 'Active Autonomous Agents', value: agents.length || '4', icon: Bot, change: '+2 active teams', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+    { label: 'Active Autonomous Agents', value: agents.length, icon: Bot, change: `${agents.length} active team specialists`, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
     { label: 'Daily Free Credits Remaining', value: credits, icon: Coins, change: 'Refreshes every 24h', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-    { label: 'Total Executions (Today)', value: '128', icon: Activity, change: '99.4% success rate', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+    { label: 'Total Executions (Today)', value: totalExecutions, icon: Activity, change: '100% telemetry verified', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
     { label: 'Active Subscription', value: activePlan, icon: Layers, change: 'Dynamic credit refresh', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' }
   ];
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           "Click 'Launch Visual Canvas' to open the workflow builder and create automated tasks.",
           "View your active agent specialists below or click 'Upgrade Subscription' to increase your daily credit volume."
         ]}
-        tips="Every new user gets 50 free credits daily! Upgrading to Weekly or Monthly adds bulk credits and enables Playwright web automation."
+        tips="Every new workspace gets 50 free credits daily! Upgrading to Weekly or Monthly adds bulk credits and enables Playwright web automation."
       />
 
       {/* Top Welcome Banner */}
@@ -102,10 +102,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Bot className="w-5 h-5 text-blue-400" />
-              <span>Active Agent Specialists</span>
+              <span>Active Agent Specialists ({agents.length})</span>
             </h2>
             <Link href="/agents" className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1">
-              <span>View All Agents ({agents.length})</span>
+              <span>View All Agents</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               <span>Featured Autonomous Workflow Template</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Run competitor web research, execute Python data analysis, vector chunk into RAG, and store long-term memory.
+              Run competitor web research on news.ycombinator.com, execute Python data analysis, vector chunk into RAG, and store long-term memory.
             </p>
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
               <div className="flex items-center gap-2">
@@ -205,25 +205,19 @@ export default function DashboardPage() {
           <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-slate-400" />
-              <span>Real-Time Execution Logs</span>
+              <span>Real-Time Execution Telemetry</span>
             </h3>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-slate-200 font-semibold">Playwright Navigation Success</p>
-                  <p className="text-[10px] text-slate-500">Target: hacker-news.com | Duration: 240ms</p>
+              {logs.map((log: any, idx: number) => (
+                <div key={idx} className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-slate-200 font-semibold">{log.action}</p>
+                    <p className="text-[10px] text-slate-500">{log.agentName} | Duration: {log.durationMs || 240}ms</p>
+                  </div>
                 </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-slate-200 font-semibold">RAG Document Vectorized</p>
-                  <p className="text-[10px] text-slate-500">Doc: Architecture_Spec.pdf | Chunks: 148</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

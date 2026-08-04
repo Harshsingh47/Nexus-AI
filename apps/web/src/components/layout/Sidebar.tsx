@@ -21,13 +21,13 @@ import { useAppStore } from '@/lib/store';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { credits, activePlan } = useAppStore();
+  const { credits, activePlan, agents } = useAppStore();
 
   const navItems = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Vibe App Builder', href: '/vibe-builder', icon: Wand2, badge: 'Base44' },
+    { label: 'Vibe App Builder', href: '/vibe-builder', icon: Wand2, badge: 'App Studio' },
     { label: 'Visual Flow Builder', href: '/builder', icon: GitFork, badge: 'Canvas' },
-    { label: 'AI Agent Teams', href: '/agents', icon: Bot, count: '15+' },
+    { label: 'AI Agent Teams', href: '/agents', icon: Bot, count: `${agents.length} Active` },
     { label: 'Knowledge Base (RAG)', href: '/knowledge', icon: Database },
     { label: 'Memory Explorer', href: '/memory', icon: BrainCircuit },
     { label: 'Observability & Logs', href: '/observability', icon: Activity, live: true },
@@ -77,7 +77,7 @@ export function Sidebar() {
                   </span>
                 )}
                 {item.count && (
-                  <span className="text-xs text-slate-500 font-mono">
+                  <span className="text-xs text-slate-400 font-mono">
                     {item.count}
                   </span>
                 )}

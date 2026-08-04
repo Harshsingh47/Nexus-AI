@@ -8,17 +8,25 @@ import {
   Coins, 
   Building2, 
   Bell, 
-  ChevronDown, 
   Cpu, 
   Plus,
-  LogOut,
-  User
+  LogOut
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 
 export function Header() {
   const router = useRouter();
-  const { credits, activePlan, fetchBilling, searchQuery, setSearchQuery, user, logout } = useAppStore();
+  const { 
+    credits, 
+    activePlan, 
+    fetchBilling, 
+    searchQuery, 
+    setSearchQuery, 
+    user, 
+    logout,
+    selectedModel,
+    setSelectedModel
+  } = useAppStore();
 
   useEffect(() => {
     fetchBilling();
@@ -28,6 +36,13 @@ export function Header() {
     logout();
     router.push('/login');
   };
+
+  const models = [
+    { value: 'gpt-4o', label: 'OpenAI gpt-4o' },
+    { value: 'claude-3-5-sonnet-20240620', label: 'Claude 3.5 Sonnet' },
+    { value: 'llama-3.1-70b-versatile', label: 'Groq Llama 3.1 70B' },
+    { value: 'gemini-1.5-pro', label: 'Google Gemini 1.5 Pro' }
+  ];
 
   return (
     <header className="h-16 border-b border-slate-800 bg-dark-950/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30 ml-64">
@@ -47,11 +62,20 @@ export function Header() {
 
       {/* Right User Bar */}
       <div className="flex items-center gap-4">
-        {/* Model Selector Pill */}
+        {/* Functional Model Selector */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
-          <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-          <span>gpt-4o / Claude 3.5</span>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+          <Cpu className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer pr-1"
+          >
+            {models.map(m => (
+              <option key={m.value} value={m.value} className="bg-slate-900 text-white">
+                {m.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Dynamic Credit Meter Pill */}

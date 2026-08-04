@@ -9,14 +9,14 @@ export default function SettingsPage() {
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Instruction Banner */}
       <InstructionBanner
-        title="Settings & Security Vault"
-        description="Manage AES-256 encrypted provider keys (OpenAI, Anthropic, Gemini), fine-grained RBAC roles, and SOC2 audit logs."
+        title="Settings & Key Storage Vault"
+        description="Manage provider API keys (OpenAI, Anthropic, Gemini), user workspace preferences, and workspace audit logs."
         steps={[
-          "KMS Vault: View status of encrypted LLM API keys stored safely with AES-256 GCM encryption.",
-          "SOC2 Audit Trails: Monitor user login events, IP addresses, and credit transactions.",
-          "Enterprise Compliance: All secret keys are decrypted only in-memory during active workflow runs."
+          "Encrypted Key Storage: View active LLM API keys formatted with AES-256 symmetric encryption storage.",
+          "Audit Activity: Monitor login timestamps, client IP addresses, and workflow credit consumption logs.",
+          "In-Memory Decryption: API keys are decrypted only in memory during active workflow execution steps."
         ]}
-        tips="KMS encryption ensures your API keys are never stored as raw text in the database!"
+        tips="Environment variables defined in .env are automatically loaded into your workspace securely!"
       />
 
       {/* Header */}
@@ -24,10 +24,10 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-white flex items-center gap-2.5">
             <Settings className="w-6 h-6 text-slate-400" />
-            <span>Workspace Settings & Security Vault</span>
+            <span>Workspace Settings & API Key Vault</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage AES-256 encrypted API keys, LLM provider credentials, fine-grained RBAC roles, organization teams, and SOC2 audit logs.
+            Manage provider API keys, workspace access control, team permissions, and real-time execution audit logs.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function SettingsPage() {
         <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <Lock className="w-5 h-5 text-blue-400" />
-            <span>Encrypted Provider API Keys (KMS Vault)</span>
+            <span>API Key Storage Vault (AES-256 Enabled)</span>
           </h3>
 
           <div className="space-y-3 font-mono text-xs">
@@ -47,7 +47,7 @@ export default function SettingsPage() {
                 <div className="font-bold text-white">OPENAI_API_KEY</div>
                 <div className="text-[10px] text-slate-500">sk-proj-••••••••••••••••3A9x</div>
               </div>
-              <span className="text-emerald-400 text-[10px]">Encrypted AES-256</span>
+              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">AES-256 Active</span>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
@@ -55,16 +55,16 @@ export default function SettingsPage() {
                 <div className="font-bold text-white">ANTHROPIC_API_KEY</div>
                 <div className="text-[10px] text-slate-500">sk-ant-••••••••••••••••7F8e</div>
               </div>
-              <span className="text-emerald-400 text-[10px]">Encrypted AES-256</span>
+              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">AES-256 Active</span>
             </div>
           </div>
         </div>
 
-        {/* RBAC Organizations & Audit Logs */}
+        {/* Access & Audit Logs */}
         <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <span>RBAC & SOC2 Audit Trails</span>
+            <span>Workspace Activity & Access Audit Logs</span>
           </h3>
 
           <div className="space-y-2 font-mono text-xs">
