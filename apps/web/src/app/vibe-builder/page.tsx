@@ -14,17 +14,25 @@ import {
   TrendingUp,
   Search,
   CheckCircle2,
-  DollarSign
+  DollarSign,
+  ShoppingCart,
+  CheckSquare,
+  Plus,
+  Trash2,
+  Layers,
+  Bot
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
 export default function VibeBuilderPage() {
-  const { deductCredits } = useAppStore();
+  const { deductCredits, addLogStep } = useAppStore();
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'PREVIEW' | 'CODE' | 'DATABASE'>('PREVIEW');
-  const [cryptoSearch, setCryptoSearch] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
+  const [cartCount, setCartCount] = useState(0);
 
   const [appState, setAppState] = useState<any>({
     type: 'CRYPTO',
@@ -53,7 +61,6 @@ export default function CryptoTrackerApp() {
   const [prices, setPrices] = useState([]);
 
   useEffect(() => {
-    // API Call to fetch real-time crypto price ticker
     fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd')
       .then(res => res.json())
       .then(data => setPrices(data));
@@ -62,7 +69,7 @@ export default function CryptoTrackerApp() {
   return (
     <div className="p-8 space-y-6 bg-slate-950 text-white rounded-2xl">
       <h1 className="text-2xl font-bold text-blue-400">Live Crypto Price Tracker</h1>
-      <p className="text-xs text-slate-400">Real-time WebSocket price updates & alerts</p>
+      <p className="text-xs text-slate-400">Real-time price updates & alerts</p>
     </div>
   );
 }`
@@ -70,7 +77,7 @@ export default function CryptoTrackerApp() {
       {
         name: 'api/crypto/route.ts',
         language: 'typescript',
-        code: `export async function GET() {\n  // Backend API route handler to proxy crypto price endpoints\n  return Response.json({ status: 'ONLINE', timestamp: Date.now() });\n}`
+        code: `export async function GET() {\n  return Response.json({ status: 'ONLINE', crypto: { btc: 64250, eth: 3450 } });\n}`
       }
     ],
     entities: [
@@ -84,101 +91,155 @@ export default function CryptoTrackerApp() {
     if (!targetPrompt.trim()) return;
 
     setIsGenerating(true);
+    setGenerationStep('1/4 Parsing prompt requirements & UI architecture...');
     deductCredits(5);
 
     const lowerPrompt = targetPrompt.toLowerCase();
     const cleanSlug = targetPrompt.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'app';
     const generatedName = targetPrompt.length > 35 ? `${targetPrompt.substring(0, 35)}...` : targetPrompt;
 
-    if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('token') || lowerPrompt.includes('bitcoin')) {
-      setAppState({
-        type: 'CRYPTO',
-        appName: `Crypto Price Tracker: ${generatedName}`,
-        description: targetPrompt,
-        status: 'GENERATED',
-        metrics: [
-          { label: 'Bitcoin (BTC)', value: '$64,250.00', change: '+3.4% 24h', color: 'text-emerald-400' },
-          { label: 'Ethereum (ETH)', value: '$3,450.50', change: '+2.1% 24h', color: 'text-blue-400' },
-          { label: 'Solana (SOL)', value: '$145.80', change: '+5.8% 24h', color: 'text-purple-400' }
-        ],
-        items: [
-          { id: '#BTC', name: 'Bitcoin', symbol: 'BTC', price: '$64,250.00', volume: '$28.4B', status: 'BULLISH' },
-          { id: '#ETH', name: 'Ethereum', symbol: 'ETH', price: '$3,450.50', volume: '$14.2B', status: 'BULLISH' },
-          { id: '#SOL', name: 'Solana', symbol: 'SOL', price: '$145.80', volume: '$4.8B', status: 'BULLISH' },
-          { id: '#BNB', name: 'BNB Token', symbol: 'BNB', price: '$580.00', volume: '$1.9B', status: 'STABLE' }
-        ],
-        files: [
-          {
-            name: `app/${cleanSlug}/page.tsx`,
-            language: 'typescript',
-            code: `// Live Crypto Price Tracker Web App\nimport React from 'react';\n\nexport default function CryptoApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono">\n      <h1>Live Crypto Price Ticker</h1>\n      <p>Prompt: ${targetPrompt}</p>\n    </div>\n  );\n}`
-          },
-          {
-            name: `api/${cleanSlug}/route.ts`,
-            language: 'typescript',
-            code: `export async function GET() {\n  return Response.json({ cryptoPrices: { btc: 64250, eth: 3450, sol: 145.8 } });\n}`
-          }
-        ],
-        entities: [
-          { name: 'CryptoPrices', fields: ['id (UUID)', 'symbol (String)', 'priceUsd (Float)', 'volume24h (Float)'] },
-          { name: 'PriceAlerts', fields: ['id (UUID)', 'targetPrice (Float)', 'alertTriggered (Boolean)'] }
-        ]
-      });
-    } else if (lowerPrompt.includes('lead') || lowerPrompt.includes('scrape') || lowerPrompt.includes('crm') || lowerPrompt.includes('email')) {
-      setAppState({
-        type: 'LEAD',
-        appName: `Autonomous Lead Scraper: ${generatedName}`,
-        description: targetPrompt,
-        status: 'GENERATED',
-        metrics: [
-          { label: 'Leads Scraped Today', value: '1,420', change: '+18% vs yesterday', color: 'text-emerald-400' },
-          { label: 'Email Verification Rate', value: '99.2%', change: 'SMTP Verified', color: 'text-blue-400' },
-          { label: 'Active CRM Pipelines', value: '12 Active', change: 'Synced to HubSpot', color: 'text-purple-400' }
-        ],
-        items: [
-          { id: '#101', name: 'Acme Corp', symbol: 'contact@acme.com', price: 'High Priority', volume: 'Score: 98.5%', status: 'VERIFIED' },
-          { id: '#102', name: 'Starlight AI', symbol: 'sales@starlight.ai', price: 'Medium Priority', volume: 'Score: 92.0%', status: 'ACTIVE' }
-        ],
-        files: [
-          {
-            name: `app/${cleanSlug}/page.tsx`,
-            language: 'typescript',
-            code: `// Lead Scraper Web App\nimport React from 'react';\n\nexport default function LeadApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono">\n      <h1>Lead Scraper & CRM Dashboard</h1>\n      <p>Prompt: ${targetPrompt}</p>\n    </div>\n  );\n}`
-          }
-        ],
-        entities: [
-          { name: 'Leads', fields: ['id (UUID)', 'companyName (String)', 'email (String)', 'leadScore (Float)'] }
-        ]
-      });
-    } else {
-      setAppState({
-        type: 'GENERIC',
-        appName: generatedName,
-        description: targetPrompt,
-        status: 'GENERATED',
-        metrics: [
-          { label: 'Processed Records', value: '1,420', change: '100% Verified', color: 'text-emerald-400' },
-          { label: 'Execution Accuracy', value: '99.2%', change: '0 Runtime Errors', color: 'text-blue-400' },
-          { label: 'Pipeline Status', value: 'ACTIVE', change: 'Live Engine', color: 'text-purple-400' }
-        ],
-        items: [
-          { id: '#101', name: `${generatedName} Record #1`, symbol: 'payload_01.json', price: 'Status: OK', volume: 'Latency: 120ms', status: 'PROCESSED' },
-          { id: '#102', name: `${generatedName} Record #2`, symbol: 'payload_02.json', price: 'Status: OK', volume: 'Latency: 140ms', status: 'ACTIVE' }
-        ],
-        files: [
-          {
-            name: `app/${cleanSlug}/page.tsx`,
-            language: 'typescript',
-            code: `// Autonomously Synthesized Web App\nimport React from 'react';\n\nexport default function CustomApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono">\n      <h1>${generatedName}</h1>\n      <p>Prompt: ${targetPrompt}</p>\n    </div>\n  );\n}`
-          }
-        ],
-        entities: [
-          { name: `${cleanSlug.replace(/-/g, '_')}_data`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
-        ]
-      });
-    }
+    setTimeout(() => {
+      setGenerationStep('2/4 Synthesizing React UI components & state hooks...');
+    }, 400);
 
-    setIsGenerating(false);
+    setTimeout(() => {
+      setGenerationStep('3/4 Generating NestJS API endpoints & database schemas...');
+    }, 800);
+
+    setTimeout(() => {
+      setGenerationStep('4/4 Compiling Next.js application bundle...');
+
+      if (lowerPrompt.includes('shop') || lowerPrompt.includes('store') || lowerPrompt.includes('e-commerce') || lowerPrompt.includes('cart') || lowerPrompt.includes('product') || lowerPrompt.includes('buy')) {
+        setAppState({
+          type: 'STORE',
+          appName: `E-Commerce Storefront: ${generatedName}`,
+          description: targetPrompt,
+          status: 'GENERATED',
+          metrics: [
+            { label: 'Active Store Products', value: '24 Items', change: 'In Stock', color: 'text-emerald-400' },
+            { label: 'Cart Conversion Rate', value: '4.8%', change: '+1.2% this week', color: 'text-blue-400' },
+            { label: 'Total Sales Revenue', value: '$12,450.00', change: 'Stripe Verified', color: 'text-purple-400' }
+          ],
+          items: [
+            { id: 'PROD-101', name: 'Wireless Noise-Canceling Headphones', symbol: '$299.00', price: '$299.00', volume: 'Stock: 45 units', status: 'IN_STOCK' },
+            { id: 'PROD-102', name: 'Ergonomic Mechanical Keyboard', symbol: '$149.00', price: '$149.00', volume: 'Stock: 18 units', status: 'BEST_SELLER' },
+            { id: 'PROD-103', name: 'Ultra-Wide 4K Gaming Monitor', symbol: '$699.00', price: '$699.00', volume: 'Stock: 8 units', status: 'LOW_STOCK' }
+          ],
+          files: [
+            {
+              name: `app/${cleanSlug}/page.tsx`,
+              language: 'typescript',
+              code: `// E-Commerce Storefront Next.js App\nimport React, { useState } from 'react';\n\nexport default function ECommerceStore() {\n  const [cart, setCart] = useState([]);\n  return (\n    <div className="p-8 bg-slate-950 text-white font-sans">\n      <h1>E-Commerce Storefront</h1>\n      <p>Prompt: ${targetPrompt}</p>\n      <button onClick={() => setCart([...cart, 'item'])}>Add to Cart ({cart.length})</button>\n    </div>\n  );\n}`
+            },
+            {
+              name: `api/checkout/route.ts`,
+              language: 'typescript',
+              code: `export async function POST(req: Request) {\n  const { cartItems } = await req.json();\n  return Response.json({ success: true, stripeCheckoutUrl: 'https://checkout.stripe.com/pay/session_101' });\n}`
+            }
+          ],
+          entities: [
+            { name: 'Products', fields: ['id (UUID)', 'title (String)', 'priceUsd (Float)', 'inventoryCount (Int)', 'category (Enum)'] },
+            { name: 'Orders', fields: ['id (UUID)', 'userId (UUID)', 'totalAmount (Float)', 'paymentStatus (Enum)'] }
+          ]
+        });
+      } else if (lowerPrompt.includes('kanban') || lowerPrompt.includes('task') || lowerPrompt.includes('todo') || lowerPrompt.includes('board') || lowerPrompt.includes('project')) {
+        setAppState({
+          type: 'KANBAN',
+          appName: `Interactive Kanban Task Board: ${generatedName}`,
+          description: targetPrompt,
+          status: 'GENERATED',
+          metrics: [
+            { label: 'Pending Tasks', value: '8 Tasks', change: 'To-Do Column', color: 'text-amber-400' },
+            { label: 'In Progress', value: '4 Tasks', change: 'Active Sprint', color: 'text-blue-400' },
+            { label: 'Completed Today', value: '18 Tasks', change: '100% Done', color: 'text-emerald-400' }
+          ],
+          items: [
+            { id: 'TASK-1', name: 'Design responsive landing page hero section', symbol: 'Frontend', price: 'High Priority', volume: 'Assigned: Sarah', status: 'IN_PROGRESS' },
+            { id: 'TASK-2', name: 'Setup Stripe webhook endpoint handler', symbol: 'Backend', price: 'Urgent', volume: 'Assigned: Alex', status: 'TO_DO' },
+            { id: 'TASK-3', name: 'Write Playwright E2E browser test suite', symbol: 'QA Automation', price: 'Normal', volume: 'Assigned: Robot', status: 'DONE' }
+          ],
+          files: [
+            {
+              name: `app/${cleanSlug}/page.tsx`,
+              language: 'typescript',
+              code: `// Kanban Task Board Web App\nimport React, { useState } from 'react';\n\nexport default function KanbanBoardApp() {\n  const [tasks, setTasks] = useState([]);\n  return (\n    <div className="p-8 bg-slate-950 text-white font-sans">\n      <h1>Interactive Kanban Board</h1>\n      <p>Prompt: ${targetPrompt}</p>\n    </div>\n  );\n}`
+            }
+          ],
+          entities: [
+            { name: 'Tasks', fields: ['id (UUID)', 'title (String)', 'columnStatus (Enum)', 'priority (Enum)', 'assignedUser (String)'] }
+          ]
+        });
+      } else if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('token') || lowerPrompt.includes('bitcoin')) {
+        setAppState({
+          type: 'CRYPTO',
+          appName: `Crypto Price Tracker: ${generatedName}`,
+          description: targetPrompt,
+          status: 'GENERATED',
+          metrics: [
+            { label: 'Bitcoin (BTC)', value: '$64,250.00', change: '+3.4% 24h', color: 'text-emerald-400' },
+            { label: 'Ethereum (ETH)', value: '$3,450.50', change: '+2.1% 24h', color: 'text-blue-400' },
+            { label: 'Solana (SOL)', value: '$145.80', change: '+5.8% 24h', color: 'text-purple-400' }
+          ],
+          items: [
+            { id: '#BTC', name: 'Bitcoin', symbol: 'BTC', price: '$64,250.00', volume: '$28.4B', status: 'BULLISH' },
+            { id: '#ETH', name: 'Ethereum', symbol: 'ETH', price: '$3,450.50', volume: '$14.2B', status: 'BULLISH' },
+            { id: '#SOL', name: 'Solana', symbol: 'SOL', price: '$145.80', volume: '$4.8B', status: 'BULLISH' },
+            { id: '#BNB', name: 'BNB Token', symbol: 'BNB', price: '$580.00', volume: '$1.9B', status: 'STABLE' }
+          ],
+          files: [
+            {
+              name: `app/${cleanSlug}/page.tsx`,
+              language: 'typescript',
+              code: `// Live Crypto Price Tracker Web App\nimport React from 'react';\n\nexport default function CryptoApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono">\n      <h1>Live Crypto Price Ticker</h1>\n      <p>Prompt: ${targetPrompt}</p>\n    </div>\n  );\n}`
+            },
+            {
+              name: `api/${cleanSlug}/route.ts`,
+              language: 'typescript',
+              code: `export async function GET() {\n  return Response.json({ cryptoPrices: { btc: 64250, eth: 3450, sol: 145.8 } });\n}`
+            }
+          ],
+          entities: [
+            { name: 'CryptoPrices', fields: ['id (UUID)', 'symbol (String)', 'priceUsd (Float)', 'volume24h (Float)'] },
+            { name: 'PriceAlerts', fields: ['id (UUID)', 'targetPrice (Float)', 'alertTriggered (Boolean)'] }
+          ]
+        });
+      } else {
+        setAppState({
+          type: 'GENERIC',
+          appName: generatedName,
+          description: targetPrompt,
+          status: 'GENERATED',
+          metrics: [
+            { label: 'Processed Items', value: '1,420', change: '100% Verified', color: 'text-emerald-400' },
+            { label: 'Execution Accuracy', value: '99.2%', change: '0 Runtime Errors', color: 'text-blue-400' },
+            { label: 'System Pipeline', value: 'ACTIVE', change: 'Live Engine', color: 'text-purple-400' }
+          ],
+          items: [
+            { id: '#101', name: `${generatedName} Item #1`, symbol: 'payload_01.json', price: 'Status: OK', volume: 'Latency: 120ms', status: 'PROCESSED' },
+            { id: '#102', name: `${generatedName} Item #2`, symbol: 'payload_02.json', price: 'Status: OK', volume: 'Latency: 140ms', status: 'ACTIVE' }
+          ],
+          files: [
+            {
+              name: `app/${cleanSlug}/page.tsx`,
+              language: 'typescript',
+              code: `// Autonomously Synthesized Full-Stack Web App\nimport React from 'react';\n\nexport default function CustomApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono">\n      <h1>${generatedName}</h1>\n      <p>Prompt: "${targetPrompt}"</p>\n    </div>\n  );\n}`
+            }
+          ],
+          entities: [
+            { name: `${cleanSlug.replace(/-/g, '_')}_records`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
+          ]
+        });
+      }
+
+      setIsGenerating(false);
+      setGenerationStep('');
+      addLogStep({
+        agentName: 'Vibe App Studio Engine',
+        action: `Synthesized full-stack web app for "${generatedName}"`,
+        reasoning: `Generated Next.js React UI components, backend route handlers, and database schemas with 0 errors.`,
+        durationMs: 1200
+      });
+    }, 1200);
   };
 
   const handlePromptClick = (text: string) => {
@@ -188,13 +249,13 @@ export default function CryptoTrackerApp() {
 
   const handleDeploy = () => {
     const slug = appState.appName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 15);
-    alert(`🎉 Web App Deployed & Hosted Successfully!\nLive Viewport: https://nexusmind.ai/app/${slug}`);
+    alert(`🎉 Full Web Application Deployed & Hosted Successfully!\nLive Viewport URL: https://nexusmind.ai/app/${slug}`);
   };
 
   const filteredItems = appState.items?.filter((item: any) =>
-    !cryptoSearch || 
-    item.name.toLowerCase().includes(cryptoSearch.toLowerCase()) || 
-    item.symbol.toLowerCase().includes(cryptoSearch.toLowerCase())
+    !searchFilter || 
+    item.name.toLowerCase().includes(searchFilter.toLowerCase()) || 
+    item.symbol.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
   return (
@@ -204,7 +265,7 @@ export default function CryptoTrackerApp() {
         title="Vibe App & AI Agent Generator Studio"
         description="Describe your application idea in natural language. NexusMind generates full-stack UI components, backend API routes, database schemas, and AI agent workflows."
         steps={[
-          "Type your app idea in the prompt bar (e.g. 'build a website to fetch crypto prices').",
+          "Type your app idea in the prompt bar (e.g. 'build an e-commerce store' or 'build a crypto price dashboard').",
           "Click 'Generate Full-Stack App (5 Credits)' to synthesize the live web app, backend endpoints, and database schemas.",
           "Switch between Live Preview, Generated Code, and Database Tables, then click 'Deploy & Host App' to publish!"
         ]}
@@ -288,21 +349,33 @@ export default function CryptoTrackerApp() {
                 "build a website to fetch crypto prices"
               </div>
               <div
-                onClick={() => handlePromptClick("Build an AI Lead Scraper with a React table and Playwright integration.")}
+                onClick={() => handlePromptClick("Build an e-commerce store with product catalog and shopping cart.")}
                 className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
-                "Build an AI Lead Scraper with a React table and Playwright integration."
+                "Build an e-commerce store with product catalog and cart."
+              </div>
+              <div
+                onClick={() => handlePromptClick("Build an interactive Kanban task manager board.")}
+                className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
+              >
+                "Build an interactive Kanban task manager board."
               </div>
             </div>
           </div>
 
           {/* Prompt Bar */}
           <div className="space-y-2 pt-2 border-t border-slate-800">
+            {isGenerating && (
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-purple-300 text-xs font-mono flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                <span>{generationStep}</span>
+              </div>
+            )}
             <textarea
               rows={3}
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
-              placeholder="Describe your web app or AI agent in natural language (e.g. 'build a website to fetch crypto prices')..."
+              placeholder="Describe your web app idea in natural language (e.g. 'build an e-commerce store' or 'build a crypto price dashboard')..."
               className="w-full bg-slate-900 border border-slate-800 text-xs rounded-xl p-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <button
@@ -334,17 +407,28 @@ export default function CryptoTrackerApp() {
                   <div>
                     <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight flex items-center gap-2">
                       {appState.type === 'CRYPTO' && <TrendingUp className="w-6 h-6 text-emerald-400" />}
+                      {appState.type === 'STORE' && <ShoppingCart className="w-6 h-6 text-purple-400" />}
+                      {appState.type === 'KANBAN' && <CheckSquare className="w-6 h-6 text-amber-400" />}
                       <span>{appState.appName}</span>
                     </h1>
                     <p className="text-xs text-slate-400 mt-1">{appState.description}</p>
                   </div>
-                  <button 
-                    onClick={() => alert(`Automation runner triggered for ${appState.appName}!`)}
-                    className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/20"
-                  >
-                    <Play className="w-3.5 h-3.5" />
-                    <span>Run Automation Agent</span>
-                  </button>
+
+                  <div className="flex items-center gap-3">
+                    {appState.type === 'STORE' && (
+                      <div className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold font-mono flex items-center gap-1.5">
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Cart ({cartCount})</span>
+                      </div>
+                    )}
+                    <button 
+                      onClick={() => alert(`Automation runner triggered for ${appState.appName}!`)}
+                      className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/20"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>Run Automation Agent</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Metrics Bar */}
@@ -358,20 +442,29 @@ export default function CryptoTrackerApp() {
                   ))}
                 </div>
 
-                {/* Interactive Search Bar for Generated App */}
+                {/* Interactive Search Bar & Actions */}
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
                     <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
-                      value={cryptoSearch}
-                      onChange={e => setCryptoSearch(e.target.value)}
-                      placeholder={appState.type === 'CRYPTO' ? "Search crypto prices (e.g. BTC, Solana)..." : "Filter records..."}
+                      value={searchFilter}
+                      onChange={e => setSearchFilter(e.target.value)}
+                      placeholder="Filter records or items..."
                       className="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl pl-9 pr-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-mono"
                     />
                   </div>
+                  {appState.type === 'STORE' && (
+                    <button
+                      onClick={() => setCartCount(c => c + 1)}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-purple-600/20"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add Item to Cart</span>
+                    </button>
+                  )}
                   <button 
-                    onClick={() => setCryptoSearch('')}
+                    onClick={() => setSearchFilter('')}
                     className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-400 hover:text-white"
                   >
                     Reset Filter
@@ -389,11 +482,12 @@ export default function CryptoTrackerApp() {
                       <thead>
                         <tr className="border-b border-slate-800 text-slate-400">
                           <th className="pb-2">ID</th>
-                          <th className="pb-2">Asset / Item Name</th>
-                          <th className="pb-2">Symbol / Payload</th>
-                          <th className="pb-2">Live Value</th>
-                          <th className="pb-2">24h Volume / Latency</th>
+                          <th className="pb-2">Item / Product Name</th>
+                          <th className="pb-2">Symbol / Category</th>
+                          <th className="pb-2">Price / Score</th>
+                          <th className="pb-2">Volume / Inventory</th>
                           <th className="pb-2">Status</th>
+                          <th className="pb-2">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
@@ -411,6 +505,18 @@ export default function CryptoTrackerApp() {
                               <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">
                                 {item.status}
                               </span>
+                            </td>
+                            <td className="py-2.5">
+                              {appState.type === 'STORE' ? (
+                                <button
+                                  onClick={() => setCartCount(c => c + 1)}
+                                  className="px-2 py-1 rounded bg-purple-600/30 text-purple-300 hover:bg-purple-600/50 text-[10px] font-bold"
+                                >
+                                  + Cart
+                                </button>
+                              ) : (
+                                <span className="text-slate-500 text-[10px]">Active</span>
+                              )}
                             </td>
                           </tr>
                         ))}
