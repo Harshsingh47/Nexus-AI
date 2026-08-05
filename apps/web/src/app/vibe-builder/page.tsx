@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   Wand2, 
   Sparkles, 
@@ -697,7 +698,9 @@ vercel.json
           {activeTab === 'PREVIEW' && (
             <div className="space-y-6 flex-1 overflow-y-auto">
               <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 font-mono">
-                <span>Viewport: http://localhost:3000/app/preview</span>
+                <Link href="/app/preview" target="_blank" className="hover:text-blue-400 transition-colors flex items-center gap-1.5 underline font-bold text-slate-300">
+                  <span>Viewport: /app/preview (Click to Open Standalone)</span>
+                </Link>
                 <span className="text-emerald-400 font-bold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Production-Ready Interactive Web Application Viewport</span>
