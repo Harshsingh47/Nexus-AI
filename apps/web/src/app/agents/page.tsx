@@ -18,22 +18,25 @@ export default function AgentsPage() {
   const { agents, fetchAgents, addAgent, deleteAgent, searchQuery } = useAppStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newAgentName, setNewAgentName] = useState('');
-  const [newAgentRole, setNewAgentRole] = useState(AgentRoleType.DEVELOPER);
+  const [newAgentRole, setNewAgentRole] = useState<string>(AgentRoleType.DEVELOPER);
   const [newAgentPrompt, setNewAgentPrompt] = useState('');
 
   useEffect(() => {
     fetchAgents();
   }, [fetchAgents]);
 
-  const handleCreateAgent = async () => {
-    if (!newAgentName.trim() || !newAgentPrompt.trim()) return;
+  const handleCreateAgent = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const nameToSave = newAgentName.trim() || 'Custom AI Specialist Agent';
+    const promptToSave = newAgentPrompt.trim() || 'Execute assigned autonomous tasks with high accuracy.';
 
     const newAgent = {
       id: `agent-${Date.now()}`,
-      name: newAgentName,
+      name: nameToSave,
       role: newAgentRole,
-      description: newAgentPrompt,
-      systemPrompt: newAgentPrompt,
+      description: promptToSave,
+      systemPrompt: promptToSave,
       provider: LLMProvider.OPENAI,
       model: 'gpt-4o',
       temperature: 0.7,
@@ -48,21 +51,17 @@ export default function AgentsPage() {
     setNewAgentName('');
     setNewAgentPrompt('');
 
-    try {
-      await fetch(`${API_BASE}/agents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAgent)
-      }).catch(() => null);
-    } catch (e) {
-      console.error(e);
-    }
+    fetch(`${API_BASE}/agents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newAgent)
+    }).catch(() => null);
   };
 
   const filteredAgents = agents.filter(a =>
     !searchQuery || 
     a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    a.role.toLowerCase().includes(searchQuery.toLowerCase())
+    (typeof a.role === 'string' && a.role.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -102,7 +101,7 @@ export default function AgentsPage() {
 
       {/* Modal / Form for Creating Agent */}
       {isCreating && (
-        <div className="p-6 rounded-2xl glass-panel border border-blue-500/30 bg-slate-900/95 space-y-4 shadow-2xl">
+        <form onSubmit={handleCreateAgent} className="p-6 rounded-2xl glass-panel border border-blue-500/30 bg-slate-900/95 space-y-4 shadow-2xl">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <span>Configure AI Specialist Agent</span>
@@ -113,6 +112,7 @@ export default function AgentsPage() {
               <label className="text-xs text-slate-400 block mb-1">Agent Name</label>
               <input
                 type="text"
+                required
                 placeholder="e.g. Senior QA Security Tester Agent"
                 value={newAgentName}
                 onChange={e => setNewAgentName(e.target.value)}
@@ -124,7 +124,7 @@ export default function AgentsPage() {
               <label className="text-xs text-slate-400 block mb-1">Specialized Role</label>
               <select
                 value={newAgentRole}
-                onChange={e => setNewAgentRole(e.target.value as any)}
+                onChange={e => setNewAgentRole(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-blue-500"
               >
                 {Object.values(AgentRoleType).map(role => (
@@ -138,6 +138,7 @@ export default function AgentsPage() {
             <label className="text-xs text-slate-400 block mb-1">System Instructions & Behavior Prompt</label>
             <textarea
               rows={3}
+              required
               placeholder="Define exact guidelines, security boundaries, and step-by-step reasoning logic for this agent..."
               value={newAgentPrompt}
               onChange={e => setNewAgentPrompt(e.target.value)}
@@ -147,19 +148,20 @@ export default function AgentsPage() {
 
           <div className="flex justify-end gap-3 pt-2">
             <button
+              type="button"
               onClick={() => setIsCreating(false)}
               className="py-2 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium"
             >
               Cancel
             </button>
             <button
-              onClick={handleCreateAgent}
+              type="submit"
               className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all"
             >
               Save Agent
             </button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Agents Roster Grid or Empty State */}

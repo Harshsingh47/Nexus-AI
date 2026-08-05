@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Database, 
   Upload, 
@@ -21,13 +21,17 @@ export default function KnowledgePage() {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const triggerFilePicker = () => {
+    const el = document.getElementById('vector-doc-file-picker') as HTMLInputElement;
+    if (el) el.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -41,23 +45,18 @@ export default function KnowledgePage() {
       chunkCount: Math.max(12, Math.ceil(file.size / 1024)),
       vectorDbStatus: 'READY' as const,
       createdAt: new Date().toISOString(),
-      metadata: { author: 'User Ingestion' }
+      metadata: { author: 'User File Ingestion' }
     };
 
-    try {
-      await fetch(`${API_BASE}/rag/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDoc)
-      }).catch(() => null);
+    addDocument(newDoc);
+    setIsUploading(false);
+    e.target.value = '';
 
-      addDocument(newDoc);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+    fetch(`${API_BASE}/rag/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newDoc)
+    }).catch(() => null);
   };
 
   const handleVectorQuery = async () => {
@@ -92,13 +91,13 @@ export default function KnowledgePage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Hidden File Input */}
+      {/* Explicit Hidden File Input */}
       <input
         type="file"
-        ref={fileInputRef}
+        id="vector-doc-file-picker"
         onChange={handleFileSelect}
         accept=".pdf,.doc,.docx,.txt,.csv,.json,.md"
-        className="hidden"
+        style={{ display: 'none' }}
       />
 
       {/* Instruction Banner */}
@@ -126,9 +125,10 @@ export default function KnowledgePage() {
         </div>
 
         <button
-          onClick={() => fileInputRef.current?.click()}
+          type="button"
+          onClick={triggerFilePicker}
           disabled={isUploading}
-          className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 disabled:opacity-50"
+          className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 disabled:opacity-50 cursor-pointer"
         >
           {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           <span>Upload Document to Vector DB</span>
@@ -185,40 +185,46 @@ export default function KnowledgePage() {
           <span>Indexed Knowledge Corpus Documents</span>
         </h3>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-mono">
-                <th className="pb-3">Document Name</th>
-                <th className="pb-3">Type</th>
-                <th className="pb-3">Size</th>
-                <th className="pb-3">Vector Chunks</th>
-                <th className="pb-3">Indexing Status</th>
-                <th className="pb-3">Ingestion Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 font-mono">
-              {filteredDocs.map((doc: any) => (
-                <tr key={doc.id} className="hover:bg-slate-900/50 transition-colors">
-                  <td className="py-3 font-medium text-white flex items-center gap-2">
-                    <FileCode className="w-4 h-4 text-cyan-400" />
-                    <span>{doc.name}</span>
-                  </td>
-                  <td className="py-3 text-slate-400 uppercase">{doc.fileType}</td>
-                  <td className="py-3 text-slate-400">{(doc.sizeBytes / 1024 / 1024).toFixed(2)} MB</td>
-                  <td className="py-3 text-cyan-300">{doc.chunkCount} chunks</td>
-                  <td className="py-3">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>{doc.vectorDbStatus}</span>
-                    </span>
-                  </td>
-                  <td className="py-3 text-slate-500">{new Date(doc.createdAt).toLocaleDateString()}</td>
+        {filteredDocs.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs font-mono">
+            No documents uploaded yet. Click "Upload Document to Vector DB" to add local files.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 font-mono">
+                  <th className="pb-3">Document Name</th>
+                  <th className="pb-3">Type</th>
+                  <th className="pb-3">Size</th>
+                  <th className="pb-3">Vector Chunks</th>
+                  <th className="pb-3">Indexing Status</th>
+                  <th className="pb-3">Ingestion Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 font-mono">
+                {filteredDocs.map((doc: any) => (
+                  <tr key={doc.id} className="hover:bg-slate-900/50 transition-colors">
+                    <td className="py-3 font-medium text-white flex items-center gap-2">
+                      <FileCode className="w-4 h-4 text-cyan-400" />
+                      <span>{doc.name}</span>
+                    </td>
+                    <td className="py-3 text-slate-400 uppercase">{doc.fileType}</td>
+                    <td className="py-3 text-slate-400">{(doc.sizeBytes / 1024 / 1024).toFixed(2)} MB</td>
+                    <td className="py-3 text-cyan-300">{doc.chunkCount} chunks</td>
+                    <td className="py-3">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>{doc.vectorDbStatus}</span>
+                      </span>
+                    </td>
+                    <td className="py-3 text-slate-500">{new Date(doc.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

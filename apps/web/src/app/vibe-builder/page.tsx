@@ -64,24 +64,25 @@ export async function POST(req: Request) {
     ]
   });
 
-  const handleVibeGenerate = async () => {
-    if (!prompt.trim()) return;
+  const handleVibeGenerate = (customPrompt?: string) => {
+    const textToUse = customPrompt || prompt;
+    if (!textToUse.trim()) return;
+
     setIsGenerating(true);
     deductCredits(5);
 
-    setTimeout(() => {
-      const generatedName = prompt.length > 35 ? `${prompt.substring(0, 35)}...` : prompt;
-      const cleanSlug = prompt.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20);
+    const generatedName = textToUse.length > 35 ? `${textToUse.substring(0, 35)}...` : textToUse;
+    const cleanSlug = textToUse.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'app';
 
-      setAppState({
-        appName: generatedName,
-        description: prompt,
-        status: 'GENERATED',
-        files: [
-          {
-            name: `app/${cleanSlug}/page.tsx`,
-            language: 'typescript',
-            code: `// Autonomously Generated Full-Stack UI
+    setAppState({
+      appName: generatedName,
+      description: textToUse,
+      status: 'GENERATED',
+      files: [
+        {
+          name: `app/${cleanSlug}/page.tsx`,
+          language: 'typescript',
+          code: `// Autonomously Generated Full-Stack UI
 import React from 'react';
 
 export default function ${cleanSlug.replace(/-/g, '_')}_App() {
@@ -90,7 +91,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-extrabold text-blue-400">${generatedName}</h1>
-          <p className="text-xs text-slate-400">Generated autonomously for prompt: "${prompt}"</p>
+          <p className="text-xs text-slate-400">Generated autonomously for prompt: "${textToUse}"</p>
         </div>
         <button className="px-4 py-2 rounded-xl bg-blue-600 font-bold text-xs">Run Workflow</button>
       </div>
@@ -101,19 +102,19 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
       </div>
     </div>
   );`
-          },
-          {
-            name: `api/${cleanSlug}/route.ts`,
-            language: 'typescript',
-            code: `export async function POST(req: Request) {\n  const data = await req.json();\n  return Response.json({ success: true, processedPrompt: "${prompt}", timestamp: Date.now() });\n}`
-          }
-        ],
-        entities: [
-          { name: `${cleanSlug.replace(/-/g, '_')}_records`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
-        ]
-      });
-      setIsGenerating(false);
-    }, 1200);
+        },
+        {
+          name: `api/${cleanSlug}/route.ts`,
+          language: 'typescript',
+          code: `export async function POST(req: Request) {\n  const data = await req.json();\n  return Response.json({ success: true, processedPrompt: "${textToUse}", timestamp: Date.now() });\n}`
+        }
+      ],
+      entities: [
+        { name: `${cleanSlug.replace(/-/g, '_')}_records`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
+      ]
+    });
+
+    setIsGenerating(false);
   };
 
   return (
@@ -199,15 +200,23 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
             </div>
 
             <div className="space-y-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Example Prompts:</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Example Prompts (Click to Use):</span>
               <div
-                onClick={() => setPrompt("Build an AI Lead Scraper with a React table, CSV export, and Playwright integration.")}
+                onClick={() => {
+                  const sample = "Build an AI Lead Scraper with a React table, CSV export, and Playwright integration.";
+                  setPrompt(sample);
+                  handleVibeGenerate(sample);
+                }}
                 className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
                 "Build an AI Lead Scraper with a React table and Playwright integration."
               </div>
               <div
-                onClick={() => setPrompt("Build an AI Customer Feedback Analyzer with sentiment graphs and email notifications.")}
+                onClick={() => {
+                  const sample = "Build an AI Customer Feedback Analyzer with sentiment graphs and email notifications.";
+                  setPrompt(sample);
+                  handleVibeGenerate(sample);
+                }}
                 className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
                 "Build an AI Customer Feedback Analyzer with sentiment graphs."
@@ -225,7 +234,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
               className="w-full bg-slate-900 border border-slate-800 text-xs rounded-xl p-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <button
-              onClick={handleVibeGenerate}
+              onClick={() => handleVibeGenerate()}
               disabled={isGenerating || !prompt.trim()}
               className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all disabled:opacity-50"
             >
