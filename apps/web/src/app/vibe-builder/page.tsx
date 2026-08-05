@@ -22,61 +22,40 @@ export default function VibeBuilderPage() {
   const [activeTab, setActiveTab] = useState<'PREVIEW' | 'CODE' | 'DATABASE'>('PREVIEW');
   
   const [appState, setAppState] = useState<any>({
-    appName: 'SaaS Lead Generator AI App',
-    description: 'Autonomous lead scraping, email validation, and CRM pipeline.',
+    appName: 'Custom AI Application',
+    description: 'Enter a prompt or click an example prompt below to generate full-stack code.',
     status: 'READY',
     files: [
       { name: 'app/page.tsx', language: 'typescript', code: `// Autonomously Synthesized Full-Stack Vibe App
 import React from 'react';
 
-export default function LeadGeneratorApp() {
+export default function CustomApp() {
   return (
     <div className="p-6 space-y-6 bg-slate-900 text-white rounded-2xl border border-slate-800">
-      <h1 className="text-2xl font-bold text-blue-400">Autonomous Lead Generator</h1>
-      <p className="text-xs text-slate-400">Powered by Playwright Scraper & Claude 3.5 Sonnet</p>
-      
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-          <span className="text-xs text-slate-400">Leads Scraped Today</span>
-          <div className="text-2xl font-bold text-emerald-400">1,420</div>
-        </div>
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-          <span className="text-xs text-slate-400">Email Verification</span>
-          <div className="text-2xl font-bold text-blue-400">99.2%</div>
-        </div>
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-          <span className="text-xs text-slate-400">CRM Pipelines</span>
-          <div className="text-2xl font-bold text-purple-400">12 Active</div>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold text-blue-400">Custom Synthesized App</h1>
+      <p className="text-xs text-slate-400">Generated via NexusMind Vibe Engine</p>
     </div>
   );
-}` },
-      { name: 'api/scrape/route.ts', language: 'typescript', code: `// Playwright Backend Scraper Endpoint
-export async function POST(req: Request) {
-  const { targetUrl } = await req.json();
-  return Response.json({ success: true, leadsFound: 42, url: targetUrl });
 }` }
     ],
     entities: [
-      { name: 'Leads', fields: ['id (UUID)', 'companyName (String)', 'email (String)', 'status (Enum)', 'score (Float)'] },
-      { name: 'Campaigns', fields: ['id (UUID)', 'title (String)', 'targetRegion (String)', 'scrapedCount (Int)'] }
+      { name: 'AppRecords', fields: ['id (UUID)', 'title (String)', 'data (JSON)', 'createdAt (DateTime)'] }
     ]
   });
 
-  const handleVibeGenerate = (customPrompt?: string) => {
-    const textToUse = customPrompt || prompt;
-    if (!textToUse.trim()) return;
+  const handleVibeGenerate = (customText?: string) => {
+    const targetPrompt = customText !== undefined ? customText : prompt;
+    if (!targetPrompt.trim()) return;
 
     setIsGenerating(true);
     deductCredits(5);
 
-    const generatedName = textToUse.length > 35 ? `${textToUse.substring(0, 35)}...` : textToUse;
-    const cleanSlug = textToUse.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'app';
+    const generatedName = targetPrompt.length > 35 ? `${targetPrompt.substring(0, 35)}...` : targetPrompt;
+    const cleanSlug = targetPrompt.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'app';
 
     setAppState({
       appName: generatedName,
-      description: textToUse,
+      description: targetPrompt,
       status: 'GENERATED',
       files: [
         {
@@ -91,7 +70,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-extrabold text-blue-400">${generatedName}</h1>
-          <p className="text-xs text-slate-400">Generated autonomously for prompt: "${textToUse}"</p>
+          <p className="text-xs text-slate-400">Generated autonomously for prompt: "${targetPrompt}"</p>
         </div>
         <button className="px-4 py-2 rounded-xl bg-blue-600 font-bold text-xs">Run Workflow</button>
       </div>
@@ -106,7 +85,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
         {
           name: `api/${cleanSlug}/route.ts`,
           language: 'typescript',
-          code: `export async function POST(req: Request) {\n  const data = await req.json();\n  return Response.json({ success: true, processedPrompt: "${textToUse}", timestamp: Date.now() });\n}`
+          code: `export async function POST(req: Request) {\n  const data = await req.json();\n  return Response.json({ success: true, processedPrompt: "${targetPrompt}", timestamp: Date.now() });\n}`
         }
       ],
       entities: [
@@ -115,6 +94,11 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
     });
 
     setIsGenerating(false);
+  };
+
+  const handlePromptClick = (text: string) => {
+    setPrompt(text);
+    handleVibeGenerate(text);
   };
 
   return (
@@ -202,21 +186,13 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Example Prompts (Click to Use):</span>
               <div
-                onClick={() => {
-                  const sample = "Build an AI Lead Scraper with a React table, CSV export, and Playwright integration.";
-                  setPrompt(sample);
-                  handleVibeGenerate(sample);
-                }}
+                onClick={() => handlePromptClick("Build an AI Lead Scraper with a React table, CSV export, and Playwright integration.")}
                 className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
                 "Build an AI Lead Scraper with a React table and Playwright integration."
               </div>
               <div
-                onClick={() => {
-                  const sample = "Build an AI Customer Feedback Analyzer with sentiment graphs and email notifications.";
-                  setPrompt(sample);
-                  handleVibeGenerate(sample);
-                }}
+                onClick={() => handlePromptClick("Build an AI Customer Feedback Analyzer with sentiment graphs and email notifications.")}
                 className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
                 "Build an AI Customer Feedback Analyzer with sentiment graphs."

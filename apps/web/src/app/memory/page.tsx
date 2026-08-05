@@ -2,9 +2,12 @@
 
 import React from 'react';
 import { BrainCircuit } from 'lucide-react';
+import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
 
 export default function MemoryPage() {
+  const { searchQuery } = useAppStore();
+
   const memories = [
     {
       id: 'mem-101',
@@ -16,21 +19,27 @@ export default function MemoryPage() {
     },
     {
       id: 'mem-102',
-      agent: 'Full-Stack Developer Agent',
+      agent: 'Python Code Sandbox Specialist',
       type: 'SHORT_TERM',
-      content: 'Scratchpad execution: Verified NestJS Swagger OpenAPI specs at http://localhost:4000/api/docs.',
+      content: 'Scratchpad execution: Processed CSV data transformations with 0 syntax errors.',
       timestamp: '15 mins ago',
       relevance: '95%'
     },
     {
       id: 'mem-103',
-      agent: 'DevSecOps Auditor',
+      agent: 'DevSecOps & Compliance Auditor',
       type: 'SEMANTIC',
-      content: 'Security Rule: Stripe API secret key must be retrieved from AES-256 vault at runtime only.',
+      content: 'Security Rule: API secret keys must be retrieved from secure environment vault at runtime.',
       timestamp: '1 day ago',
       relevance: '99%'
     }
   ];
+
+  const filteredMemories = memories.filter(mem =>
+    !searchQuery ||
+    mem.agent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    mem.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -61,7 +70,7 @@ export default function MemoryPage() {
 
       {/* Memory Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {memories.map((mem) => (
+        {filteredMemories.map((mem) => (
           <div key={mem.id} className="p-6 rounded-2xl glass-card border border-slate-800 hover:border-pink-500/40 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 font-mono font-semibold">
@@ -76,7 +85,7 @@ export default function MemoryPage() {
             </p>
 
             <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800">
-              <span>Relevance Score</span>
+              <span>Relevance Match</span>
               <span className="text-emerald-400 font-bold">{mem.relevance}</span>
             </div>
           </div>

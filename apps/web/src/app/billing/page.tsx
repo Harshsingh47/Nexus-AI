@@ -19,18 +19,19 @@ export default function BillingPage() {
 
   const handleSubscribe = async (tier: SubscriptionPlanTier) => {
     setLoadingTier(tier);
+    setPlan(tier);
+
     try {
       await fetch(`${API_BASE}/billing/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planTier: tier })
       }).catch(() => null);
-
-      setPlan(tier);
     } catch (e) {
       console.error(e);
     } finally {
       setLoadingTier(null);
+      alert(`Upgraded workspace to ${SUBSCRIPTION_TIERS_CONFIG[tier]?.name || tier}! Credits updated.`);
     }
   };
 
