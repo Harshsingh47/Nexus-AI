@@ -21,10 +21,8 @@ import {
   Layers,
   HelpCircle,
   Check,
-  Send,
   Bell,
-  Star,
-  Download
+  Star
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { InstructionBanner } from '@/components/ui/InstructionBanner';
@@ -41,43 +39,44 @@ export default function VibeBuilderPage() {
   const [searchFilter, setSearchFilter] = useState('');
   const [cartCount, setCartCount] = useState(0);
   const [currency, setCurrency] = useState('USD');
-  const [watchlist, setWatchlist] = useState<string[]>(['#BTC', '#ETH']);
+  const [watchlist, setWatchlist] = useState<string[]>(['#PROD-101', '#PROD-102']);
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
-    { role: 'assistant', text: 'Welcome to Vibe Coding Studio! Describe your web app idea, and I will generate production-ready code, live UI components, and Prisma DB schemas.' }
+    { role: 'assistant', text: 'Welcome to Vibe Coding Studio! Describe your web app idea (e.g. "build ecom platform"), and I will compile a production-ready application with full UI components, backend APIs, and Prisma DB schemas.' }
   ]);
   const [chatInput, setChatInput] = useState('');
 
   const [appState, setAppState] = useState<any>({
-    type: 'CRYPTO',
-    appName: 'Real-Time Crypto Price Tracker & Alert Web App',
-    description: 'Fetches live market prices for Bitcoin, Ethereum, Solana, and top tokens with price alert thresholds.',
+    type: 'STORE',
+    appName: 'E-Commerce Storefront & Order Management Platform',
+    description: 'Full-stack storefront with product catalog, cart drawer, inventory tracking, and Stripe checkout integration.',
     status: 'GENERATED',
     metrics: [
-      { label: 'Bitcoin (BTC)', value: '$64,250.00', change: '+3.4% 24h', color: 'text-emerald-400' },
-      { label: 'Ethereum (ETH)', value: '$3,450.50', change: '+2.1% 24h', color: 'text-blue-400' },
-      { label: 'Solana (SOL)', value: '$145.80', change: '+5.8% 24h', color: 'text-purple-400' }
+      { label: 'Active Store Products', value: '48 Products', change: 'In Stock', color: 'text-emerald-400' },
+      { label: 'Cart Conversion Rate', value: '4.8%', change: '+1.2% this week', color: 'text-blue-400' },
+      { label: 'Total Store Revenue', value: '$18,920.00', change: 'Stripe Verified', color: 'text-purple-400' }
     ],
     items: [
-      { id: '#BTC', name: 'Bitcoin', symbol: 'BTC', price: '$64,250.00', volume: '$28.4B', status: 'BULLISH' },
-      { id: '#ETH', name: 'Ethereum', symbol: 'ETH', price: '$3,450.50', volume: '$14.2B', status: 'BULLISH' },
-      { id: '#SOL', name: 'Solana', symbol: 'SOL', price: '$145.80', volume: '$4.8B', status: 'BULLISH' },
-      { id: '#BNB', name: 'BNB Token', symbol: 'BNB', price: '$580.00', volume: '$1.9B', status: 'STABLE' }
+      { id: '#PROD-101', name: 'Wireless Noise-Canceling Headphones', symbol: '$299.00', price: '$299.00', volume: 'Stock: 45 units', status: 'IN_STOCK' },
+      { id: '#PROD-102', name: 'Ergonomic Mechanical Keyboard', symbol: '$149.00', price: '$149.00', volume: 'Stock: 18 units', status: 'BEST_SELLER' },
+      { id: '#PROD-103', name: 'Ultra-Wide 4K Gaming Monitor', symbol: '$699.00', price: '$699.00', volume: 'Stock: 8 units', status: 'LOW_STOCK' },
+      { id: '#PROD-104', name: 'Smart Desk Ambient Lighting Strip', symbol: '$79.00', price: '$79.00', volume: 'Stock: 120 units', status: 'NEW_RELEASE' }
     ],
     files: [
       {
-        name: 'app/crypto/page.tsx',
+        name: 'app/store/page.tsx',
         language: 'typescript',
-        code: `// Production-Ready Crypto Tracker Next.js App\nimport React, { useState, useEffect } from 'react';\n\nexport default function CryptoTrackerApp() {\n  const [prices, setPrices] = useState([]);\n\n  useEffect(() => {\n    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd')\n      .then(res => res.json())\n      .then(data => setPrices(data));\n  }, []);\n\n  return (\n    <div className="p-8 space-y-6 bg-slate-950 text-white rounded-2xl font-mono">\n      <h1 className="text-2xl font-bold text-blue-400">Live Crypto Price Tracker</h1>\n      <p className="text-xs text-slate-400">Real-time WebSocket price updates & alerts</p>\n    </div>\n  );\n}`
+        code: `// Production-Ready E-Commerce Storefront Next.js App\nimport React, { useState } from 'react';\n\nexport default function ECommerceStoreApp() {\n  const [cart, setCart] = useState([]);\n\n  const handleAddToCart = (product) => {\n    setCart(prev => [...prev, product]);\n  };\n\n  return (\n    <div className="p-8 space-y-6 bg-slate-950 text-white rounded-2xl font-sans">\n      <div className="flex justify-between items-center">\n        <h1 className="text-2xl font-bold text-purple-400">Production E-Commerce Platform</h1>\n        <span className="px-3 py-1 bg-purple-600/20 text-purple-300 rounded-xl">Cart ({cart.length})</span>\n      </div>\n      <p className="text-xs text-slate-400">Integrated with Stripe Payments & PostgreSQL Inventory</p>\n    </div>\n  );\n}`
       },
       {
-        name: 'api/crypto/route.ts',
+        name: 'api/checkout/route.ts',
         language: 'typescript',
-        code: `export async function GET() {\n  return Response.json({ status: 'ONLINE', crypto: { btc: 64250, eth: 3450 } });\n}`
+        code: `import { NextResponse } from 'next/server';\n\nexport async function POST(req: Request) {\n  const { cartItems } = await req.json();\n  return NextResponse.json({ success: true, stripeCheckoutUrl: 'https://checkout.stripe.com/pay/session_ecom_101' });\n}`
       }
     ],
     entities: [
-      { name: 'CryptoAssets', fields: ['id (UUID)', 'symbol (String)', 'priceUsd (Float)', 'volume24h (Float)', 'updatedAt (DateTime)'] },
-      { name: 'PriceAlerts', fields: ['id (UUID)', 'userId (UUID)', 'targetPrice (Float)', 'status (Enum)'] }
+      { name: 'Products', fields: ['id (UUID)', 'title (String)', 'priceUsd (Float)', 'inventoryCount (Int)', 'category (Enum)', 'createdAt (DateTime)'] },
+      { name: 'Orders', fields: ['id (UUID)', 'userId (UUID)', 'totalAmount (Float)', 'paymentStatus (Enum)', 'fulfillmentStatus (Enum)'] },
+      { name: 'CartItems', fields: ['id (UUID)', 'orderId (UUID)', 'productId (UUID)', 'quantity (Int)'] }
     ]
   });
 
@@ -88,7 +87,19 @@ export default function VibeBuilderPage() {
     const lowerPrompt = targetPrompt.toLowerCase();
 
     // Prepare interactive clarifying questions (Emergent / Lovable style)
-    if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('bitcoin')) {
+    if (lowerPrompt.includes('ecom') || lowerPrompt.includes('shop') || lowerPrompt.includes('store') || lowerPrompt.includes('commerce')) {
+      setClarificationData({
+        title: 'E-Commerce Platform Technical Specification Interview',
+        subtitle: 'Configure storefront architecture and payment gateway before code compilation:',
+        questions: [
+          { key: 'payment', label: 'Payment Gateway', options: ['Stripe Checkout API', 'PayPal Express', 'Crypto Pay Gateway'] },
+          { key: 'inventory', label: 'Database & Sync', options: ['PostgreSQL & Prisma ORM', 'Shopify Storefront API', 'Realtime Redis Cache'] },
+          { key: 'theme', label: 'Storefront UI Theme', options: ['Dark Mode Glassmorphic', 'Clean Modern Light', 'High-Contrast Cyber'] }
+        ]
+      });
+      setSelectedOptions({ payment: 'Stripe Checkout API', inventory: 'PostgreSQL & Prisma ORM', theme: 'Dark Mode Glassmorphic' });
+      setShowClarification(true);
+    } else if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('bitcoin')) {
       setClarificationData({
         title: 'Crypto App Specification Interview',
         subtitle: 'Customize technical architecture before compiling production code:',
@@ -100,17 +111,6 @@ export default function VibeBuilderPage() {
       });
       setSelectedOptions({ provider: 'CoinGecko API (Free)', features: 'Live Price Ticker & Chart', auth: 'No Auth (Public)' });
       setShowClarification(true);
-    } else if (lowerPrompt.includes('shop') || lowerPrompt.includes('store') || lowerPrompt.includes('e-commerce')) {
-      setClarificationData({
-        title: 'E-Commerce Store Specification Interview',
-        subtitle: 'Configure storefront architecture and payment gateway:',
-        questions: [
-          { key: 'payment', label: 'Payment Gateway', options: ['Stripe Checkout', 'PayPal Express', 'Crypto Payments'] },
-          { key: 'inventory', label: 'Inventory Sync', options: ['PostgreSQL Database', 'Shopify Storefront API', 'Mock Inventory'] }
-        ]
-      });
-      setSelectedOptions({ payment: 'Stripe Checkout', inventory: 'PostgreSQL Database' });
-      setShowClarification(true);
     } else {
       executeCompilation(targetPrompt);
     }
@@ -119,7 +119,7 @@ export default function VibeBuilderPage() {
   const executeCompilation = (targetPrompt: string) => {
     setShowClarification(false);
     setIsGenerating(true);
-    setGenerationStep('1/4 Analyzing requirements & user choices...');
+    setGenerationStep('1/4 Parsing prompt requirements & UI architecture...');
     deductCredits(5);
 
     const lowerPrompt = targetPrompt.toLowerCase();
@@ -137,11 +137,45 @@ export default function VibeBuilderPage() {
     setTimeout(() => {
       setGenerationStep('4/4 Compiling Next.js application bundle...');
 
-      if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('bitcoin')) {
+      if (lowerPrompt.includes('ecom') || lowerPrompt.includes('shop') || lowerPrompt.includes('store') || lowerPrompt.includes('commerce') || lowerPrompt.includes('cart')) {
+        setAppState({
+          type: 'STORE',
+          appName: `E-Commerce Storefront: ${generatedName}`,
+          description: `Built with ${selectedOptions.payment || 'Stripe Checkout API'} & ${selectedOptions.inventory || 'PostgreSQL & Prisma'}. Prompt: "${targetPrompt}"`,
+          status: 'GENERATED',
+          metrics: [
+            { label: 'Active Store Products', value: '48 Products', change: 'In Stock', color: 'text-emerald-400' },
+            { label: 'Cart Conversion Rate', value: '4.8%', change: '+1.2% this week', color: 'text-blue-400' },
+            { label: 'Total Store Revenue', value: '$18,920.00', change: 'Stripe Verified', color: 'text-purple-400' }
+          ],
+          items: [
+            { id: '#PROD-101', name: 'Wireless Noise-Canceling Headphones', symbol: '$299.00', price: '$299.00', volume: 'Stock: 45 units', status: 'IN_STOCK' },
+            { id: '#PROD-102', name: 'Ergonomic Mechanical Keyboard', symbol: '$149.00', price: '$149.00', volume: 'Stock: 18 units', status: 'BEST_SELLER' },
+            { id: '#PROD-103', name: 'Ultra-Wide 4K Gaming Monitor', symbol: '$699.00', price: '$699.00', volume: 'Stock: 8 units', status: 'LOW_STOCK' },
+            { id: '#PROD-104', name: 'Smart Desk Ambient Lighting Strip', symbol: '$79.00', price: '$79.00', volume: 'Stock: 120 units', status: 'NEW_RELEASE' }
+          ],
+          files: [
+            {
+              name: `app/${cleanSlug}/page.tsx`,
+              language: 'typescript',
+              code: `// Production E-Commerce Storefront Next.js App\nimport React, { useState } from 'react';\n\nexport default function ECommerceStore() {\n  const [cart, setCart] = useState([]);\n  const paymentGateway = "${selectedOptions.payment || 'Stripe Checkout'}";\n\n  const handleAddToCart = (product) => {\n    setCart(prev => [...prev, product]);\n  };\n\n  return (\n    <div className="p-8 bg-slate-950 text-white font-sans rounded-2xl">\n      <h1 className="text-2xl font-bold text-purple-400">${generatedName}</h1>\n      <p className="text-xs text-slate-400">Payment Gateway: {paymentGateway} | Prompt: "${targetPrompt}"</p>\n    </div>\n  );\n}`
+            },
+            {
+              name: `api/${cleanSlug}/route.ts`,
+              language: 'typescript',
+              code: `export async function POST(req: Request) {\n  const { cartItems } = await req.json();\n  return Response.json({ success: true, checkoutUrl: 'https://checkout.stripe.com/pay/session_101' });\n}`
+            }
+          ],
+          entities: [
+            { name: 'Products', fields: ['id (UUID)', 'title (String)', 'priceUsd (Float)', 'inventoryCount (Int)', 'category (Enum)'] },
+            { name: 'Orders', fields: ['id (UUID)', 'userId (UUID)', 'totalAmount (Float)', 'paymentStatus (Enum)'] }
+          ]
+        });
+      } else if (lowerPrompt.includes('crypto') || lowerPrompt.includes('price') || lowerPrompt.includes('coin') || lowerPrompt.includes('bitcoin')) {
         setAppState({
           type: 'CRYPTO',
           appName: `Crypto Price Tracker: ${generatedName}`,
-          description: `Configured with ${selectedOptions.provider || 'CoinGecko API'} & ${selectedOptions.auth || 'Public Access'}. ${targetPrompt}`,
+          description: `Built with ${selectedOptions.provider || 'CoinGecko API'} & ${selectedOptions.auth || 'Public Access'}. Prompt: "${targetPrompt}"`,
           status: 'GENERATED',
           metrics: [
             { label: 'Bitcoin (BTC)', value: '$64,250.00', change: '+3.4% 24h', color: 'text-emerald-400' },
@@ -158,69 +192,37 @@ export default function VibeBuilderPage() {
             {
               name: `app/${cleanSlug}/page.tsx`,
               language: 'typescript',
-              code: `// Production-Ready Crypto Tracker Web App\nimport React, { useState, useEffect } from 'react';\n\nexport default function CryptoTrackerApp() {\n  const [prices, setPrices] = useState([]);\n  const provider = "${selectedOptions.provider || 'CoinGecko'}";\n\n  useEffect(() => {\n    fetch('/api/crypto/ticker')\n      .then(res => res.json())\n      .then(data => setPrices(data));\n  }, []);\n\n  return (\n    <div className="p-8 space-y-6 bg-slate-950 text-white font-mono rounded-2xl">\n      <h1 className="text-2xl font-bold text-blue-400">Live Crypto Price Tracker</h1>\n      <p className="text-xs text-slate-400">Provider: {provider} | Prompt: "${targetPrompt}"</p>\n    </div>\n  );\n}`
-            },
-            {
-              name: `api/${cleanSlug}/route.ts`,
-              language: 'typescript',
-              code: `export async function GET() {\n  return Response.json({ success: true, ticker: { btc: 64250, eth: 3450, sol: 145.8 } });\n}`
+              code: `// Production Crypto Tracker Next.js App\nimport React, { useState, useEffect } from 'react';\n\nexport default function CryptoTrackerApp() {\n  const [prices, setPrices] = useState([]);\n  const provider = "${selectedOptions.provider || 'CoinGecko'}";\n\n  return (\n    <div className="p-8 bg-slate-950 text-white font-mono rounded-2xl">\n      <h1>Live Crypto Price Tracker ({provider})</h1>\n    </div>\n  );\n}`
             }
           ],
           entities: [
-            { name: 'CryptoPrices', fields: ['id (UUID)', 'symbol (String)', 'priceUsd (Float)', 'volume24h (Float)', 'updatedAt (DateTime)'] },
-            { name: 'PriceAlerts', fields: ['id (UUID)', 'userId (UUID)', 'targetPrice (Float)', 'status (Enum)'] }
-          ]
-        });
-      } else if (lowerPrompt.includes('shop') || lowerPrompt.includes('store') || lowerPrompt.includes('e-commerce')) {
-        setAppState({
-          type: 'STORE',
-          appName: `E-Commerce Storefront: ${generatedName}`,
-          description: `Configured with ${selectedOptions.payment || 'Stripe Checkout'}. ${targetPrompt}`,
-          status: 'GENERATED',
-          metrics: [
-            { label: 'Active Store Products', value: '24 Items', change: 'In Stock', color: 'text-emerald-400' },
-            { label: 'Cart Conversion Rate', value: '4.8%', change: '+1.2% this week', color: 'text-blue-400' },
-            { label: 'Total Sales Revenue', value: '$12,450.00', change: 'Stripe Verified', color: 'text-purple-400' }
-          ],
-          items: [
-            { id: 'PROD-101', name: 'Wireless Noise-Canceling Headphones', symbol: '$299.00', price: '$299.00', volume: 'Stock: 45 units', status: 'IN_STOCK' },
-            { id: 'PROD-102', name: 'Ergonomic Mechanical Keyboard', symbol: '$149.00', price: '$149.00', volume: 'Stock: 18 units', status: 'BEST_SELLER' }
-          ],
-          files: [
-            {
-              name: `app/${cleanSlug}/page.tsx`,
-              language: 'typescript',
-              code: `// E-Commerce Storefront App\nimport React, { useState } from 'react';\n\nexport default function StoreApp() {\n  return (\n    <div className="p-8 bg-slate-950 text-white font-sans rounded-2xl">\n      <h1>Storefront ({selectedOptions.payment || 'Stripe'})</h1>\n    </div>\n  );\n}`
-            }
-          ],
-          entities: [
-            { name: 'Products', fields: ['id (UUID)', 'title (String)', 'priceUsd (Float)', 'inventoryCount (Int)'] }
+            { name: 'CryptoPrices', fields: ['id (UUID)', 'symbol (String)', 'priceUsd (Float)', 'volume24h (Float)'] }
           ]
         });
       } else {
         setAppState({
-          type: 'GENERIC',
+          type: 'CUSTOM',
           appName: generatedName,
           description: targetPrompt,
           status: 'GENERATED',
           metrics: [
-            { label: 'Processed Items', value: '1,420', change: '100% Verified', color: 'text-emerald-400' },
-            { label: 'Execution Accuracy', value: '99.2%', change: '0 Runtime Errors', color: 'text-blue-400' },
-            { label: 'System Pipeline', value: 'ACTIVE', change: 'Live Engine', color: 'text-purple-400' }
+            { label: 'Active User Sessions', value: '1,280', change: '+14% active', color: 'text-emerald-400' },
+            { label: 'API Processing Latency', value: '120ms', change: 'Optimal Health', color: 'text-blue-400' },
+            { label: 'Database Storage Status', value: 'SYNCED', change: 'PostgreSQL Connected', color: 'text-purple-400' }
           ],
           items: [
-            { id: '#101', name: `${generatedName} Item #1`, symbol: 'payload_01.json', price: 'Status: OK', volume: 'Latency: 120ms', status: 'PROCESSED' },
-            { id: '#102', name: `${generatedName} Item #2`, symbol: 'payload_02.json', price: 'Status: OK', volume: 'Latency: 140ms', status: 'ACTIVE' }
+            { id: '#REC-101', name: `${generatedName} Record #1`, symbol: 'payload_01.json', price: 'Status: OK', volume: 'Latency: 120ms', status: 'ACTIVE' },
+            { id: '#REC-102', name: `${generatedName} Record #2`, symbol: 'payload_02.json', price: 'Status: OK', volume: 'Latency: 140ms', status: 'COMPLETED' }
           ],
           files: [
             {
               name: `app/${cleanSlug}/page.tsx`,
               language: 'typescript',
-              code: `// Production-Ready Synthesized Web App\nimport React from 'react';\n\nexport default function CustomApp() {\n  return (\n    <div className="p-6 bg-slate-950 text-white font-mono rounded-2xl">\n      <h1>${generatedName}</h1>\n      <p>Prompt: "${targetPrompt}"</p>\n    </div>\n  );\n}`
+              code: `// Production Synthesized Full-Stack Web App\nimport React from 'react';\n\nexport default function ${cleanSlug.replace(/-/g, '_')}_App() {\n  return (\n    <div className="p-8 bg-slate-950 text-white font-sans rounded-2xl">\n      <h1 className="text-2xl font-bold text-blue-400">${generatedName}</h1>\n      <p className="text-xs text-slate-400">Prompt: "${targetPrompt}"</p>\n    </div>\n  );\n}`
             }
           ],
           entities: [
-            { name: `${cleanSlug.replace(/-/g, '_')}_data`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
+            { name: `${cleanSlug.replace(/-/g, '_')}_records`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
           ]
         });
       }
@@ -240,13 +242,6 @@ export default function VibeBuilderPage() {
         durationMs: 1200
       });
     }, 1200);
-  };
-
-  const handleRefineChat = () => {
-    if (!chatInput.trim()) return;
-    const text = chatInput;
-    setChatInput('');
-    handlePromptSubmit(text);
   };
 
   const toggleWatchlist = (id: string) => {
@@ -275,7 +270,7 @@ export default function VibeBuilderPage() {
         title="Vibe App Studio (Emergent / Lovable AI Platform)"
         description="Describe any web app in natural language. NexusMind interviews your architectural preferences, then generates production-ready code, live UI components, and Prisma schemas."
         steps={[
-          "Type your prompt idea (e.g. 'build a website to fetch crypto prices').",
+          "Type your prompt idea (e.g. 'build ecom platform' or 'build a website to fetch crypto prices').",
           "Answer Clarifying Specification Questions or click 'Compile App' to generate.",
           "Interact with the Live Viewport, inspect code files, or type refinement instructions in the iteration chat!"
         ]}
@@ -405,21 +400,21 @@ export default function VibeBuilderPage() {
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Example Prompts:</span>
               <div
                 onClick={() => {
+                  setPrompt("build ecom platform");
+                  handlePromptSubmit("build ecom platform");
+                }}
+                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
+              >
+                "build ecom platform"
+              </div>
+              <div
+                onClick={() => {
                   setPrompt("build a website to fetch crypto prices");
                   handlePromptSubmit("build a website to fetch crypto prices");
                 }}
                 className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
               >
                 "build a website to fetch crypto prices"
-              </div>
-              <div
-                onClick={() => {
-                  setPrompt("Build an e-commerce store with product catalog and cart.");
-                  handlePromptSubmit("Build an e-commerce store with product catalog and cart.");
-                }}
-                className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 hover:border-purple-500/40 cursor-pointer transition-all"
-              >
-                "Build an e-commerce store with product catalog and cart."
               </div>
             </div>
           </div>
@@ -436,7 +431,7 @@ export default function VibeBuilderPage() {
               rows={3}
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
-              placeholder="Describe your web app idea (e.g. 'build a website to fetch crypto prices')..."
+              placeholder="Describe your web app idea (e.g. 'build ecom platform' or 'build a website to fetch crypto prices')..."
               className="w-full bg-slate-900 border border-slate-800 text-xs rounded-xl p-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <button
@@ -475,27 +470,6 @@ export default function VibeBuilderPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {appState.type === 'CRYPTO' && (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={currency}
-                          onChange={e => setCurrency(e.target.value)}
-                          className="bg-slate-950 border border-slate-800 text-xs font-mono text-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-500"
-                        >
-                          <option value="USD">USD ($)</option>
-                          <option value="EUR">EUR (€)</option>
-                          <option value="GBP">GBP (£)</option>
-                        </select>
-                        <button
-                          onClick={() => alert(`Price Alert threshold set for ${appState.appName}!`)}
-                          className="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold font-mono flex items-center gap-1"
-                        >
-                          <Bell className="w-3.5 h-3.5" />
-                          <span>Set Alert</span>
-                        </button>
-                      </div>
-                    )}
-
                     {appState.type === 'STORE' && (
                       <div className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold font-mono flex items-center gap-1.5">
                         <ShoppingCart className="w-4 h-4" />
@@ -546,7 +520,7 @@ export default function VibeBuilderPage() {
                       type="text"
                       value={searchFilter}
                       onChange={e => setSearchFilter(e.target.value)}
-                      placeholder="Filter records or assets..."
+                      placeholder="Filter records or items..."
                       className="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl pl-9 pr-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-mono"
                     />
                   </div>
@@ -556,7 +530,7 @@ export default function VibeBuilderPage() {
                       className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-purple-600/20"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Add Item to Cart</span>
+                      <span>Add Product to Cart</span>
                     </button>
                   )}
                   <button 
@@ -579,11 +553,12 @@ export default function VibeBuilderPage() {
                         <tr className="border-b border-slate-800 text-slate-400">
                           <th className="pb-2">Watch</th>
                           <th className="pb-2">ID</th>
-                          <th className="pb-2">Asset / Item Name</th>
-                          <th className="pb-2">Symbol</th>
-                          <th className="pb-2">Live Price ({currency})</th>
-                          <th className="pb-2">24h Volume / Stock</th>
+                          <th className="pb-2">Product / Asset Name</th>
+                          <th className="pb-2">Symbol / Price</th>
+                          <th className="pb-2">Value</th>
+                          <th className="pb-2">Volume / Inventory</th>
                           <th className="pb-2">Status</th>
+                          <th className="pb-2">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
@@ -599,7 +574,6 @@ export default function VibeBuilderPage() {
                             </td>
                             <td className="py-2.5 text-slate-500">{item.id}</td>
                             <td className="py-2.5 font-bold text-white flex items-center gap-1.5">
-                              {appState.type === 'CRYPTO' && <DollarSign className="w-3.5 h-3.5 text-emerald-400" />}
                               <span>{item.name}</span>
                             </td>
                             <td className="py-2.5 text-blue-400">{item.symbol}</td>
@@ -609,6 +583,18 @@ export default function VibeBuilderPage() {
                               <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">
                                 {item.status}
                               </span>
+                            </td>
+                            <td className="py-2.5">
+                              {appState.type === 'STORE' ? (
+                                <button
+                                  onClick={() => setCartCount(c => c + 1)}
+                                  className="px-2.5 py-1 rounded bg-purple-600/30 text-purple-300 hover:bg-purple-600/50 text-[10px] font-bold"
+                                >
+                                  + Cart
+                                </button>
+                              ) : (
+                                <span className="text-slate-500 text-[10px]">Active</span>
+                              )}
                             </td>
                           </tr>
                         ))}
