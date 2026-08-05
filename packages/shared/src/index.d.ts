@@ -1,6 +1,3 @@
-/**
- * NexusMind Shared Type Definitions & Zod Schemas
- */
 export declare enum LLMProvider {
     OPENAI = "OPENAI",
     ANTHROPIC = "ANTHROPIC",

@@ -1,7 +1,4 @@
 "use strict";
-/**
- * NexusMind Shared Type Definitions & Zod Schemas
- */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AgentRoleType = exports.WorkflowNodeType = exports.SUBSCRIPTION_TIERS_CONFIG = exports.SubscriptionPlanTier = exports.UserRole = exports.LLMProvider = void 0;
 var LLMProvider;
@@ -136,3 +133,4 @@ var AgentRoleType;
     AgentRoleType["DEVOPS"] = "DEVOPS";
     AgentRoleType["DOCUMENTATION"] = "DOCUMENTATION";
 })(AgentRoleType || (exports.AgentRoleType = AgentRoleType = {}));
+//# sourceMappingURL=index.js.map

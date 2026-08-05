@@ -8,9 +8,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
+    "rootDir": "src",
     "paths": {
-      "@nexusmind/shared": ["../shared/src"]
+      "@nexusmind/shared": ["../shared/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*"]
