@@ -9,8 +9,8 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user account and initialize organization' })
-  async register(@Body() body: { email: string; password: string; fullName: string }) {
-    return this.authService.register(body.email, body.password, body.fullName);
+  async register(@Body() body: { email: string; password: string; fullName: string; orgName?: string }) {
+    return this.authService.register(body.email, body.password, body.fullName, body.orgName);
   }
 
   @Post('login')
@@ -22,7 +22,7 @@ export class AuthController {
   @Post('google')
   @ApiOperation({ summary: 'Login / Onboard via Google OAuth2' })
   async googleLogin(@Body() body: { token: string; profile: { email: string; name: string; avatarUrl?: string } }) {
-    return this.authService.loginWithGoogle(body.token, body.profile);
+    return this.authService.loginWithGoogle(body.token, profile);
   }
 
   @Post('magic-link')
@@ -34,7 +34,7 @@ export class AuthController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile and organization details' })
   async getProfile(@Headers('authorization') authHeader?: string) {
-    const userId = 'usr-demo-admin-01';
+    const userId = 'usr-admin-01';
     return this.authService.getProfile(userId);
   }
 }

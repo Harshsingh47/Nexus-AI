@@ -10,7 +10,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async register(email: string, passwordInput: string, fullName: string, role = 'MEMBER') {
+  async register(email: string, passwordInput: string, fullName: string, orgName?: string, role = 'MEMBER') {
     if (!email || !passwordInput || !fullName) {
       throw new BadRequestException('Email, password, and full name are required');
     }
@@ -22,13 +22,14 @@ export class AuthService {
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(passwordInput, salt);
+    const workspaceName = orgName || `${fullName}'s Workspace`;
 
     const org = await this.prisma.organization.create({
       data: {
-        name: `${fullName}'s Workspace`,
+        name: workspaceName,
         slug: `workspace-${Date.now()}`
       }
-    }).catch(() => ({ id: `org-${Date.now()}`, name: `${fullName}'s Workspace` }));
+    }).catch(() => ({ id: `org-${Date.now()}`, name: workspaceName }));
 
     const user = await this.prisma.user.create({
       data: {
@@ -57,7 +58,7 @@ export class AuthService {
     }).catch(() => null);
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
-    return { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, token };
+    return { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, orgName: workspaceName }, token };
   }
 
   async login(email: string, passwordInput: string) {

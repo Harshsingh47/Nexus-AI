@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Database, 
   Upload, 
@@ -17,26 +17,31 @@ import { InstructionBanner } from '@/components/ui/InstructionBanner';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function KnowledgePage() {
-  const { documents, fetchDocuments, addDocument } = useAppStore();
+  const { documents, fetchDocuments, addDocument, searchQuery } = useAppStore();
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  const handleUploadSample = async () => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsUploading(true);
+    const fileExt = file.name.split('.').pop() || 'txt';
     const newDoc = {
       id: `doc-${Date.now()}`,
-      name: 'NexusMind_Enterprise_Security_Whitepaper.pdf',
-      fileType: 'pdf',
-      sizeBytes: 1540000,
-      chunkCount: 84,
+      name: file.name,
+      fileType: fileExt,
+      sizeBytes: file.size,
+      chunkCount: Math.max(12, Math.ceil(file.size / 1024)),
       vectorDbStatus: 'READY' as const,
       createdAt: new Date().toISOString(),
-      metadata: { author: 'Security Team' }
+      metadata: { author: 'User Ingestion' }
     };
 
     try {
@@ -51,6 +56,7 @@ export default function KnowledgePage() {
       console.error(e);
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -80,14 +86,27 @@ export default function KnowledgePage() {
     }
   };
 
+  const filteredDocs = documents.filter(doc => 
+    !searchQuery || doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".pdf,.doc,.docx,.txt,.csv,.json,.md"
+        className="hidden"
+      />
+
       {/* Instruction Banner */}
       <InstructionBanner
         title="Knowledge Base (RAG Studio)"
         description="Upload documents (PDF, Word, Excel, CSV, Repos) to index into the vector database for factual AI agent lookup."
         steps={[
-          "Upload Files: Click 'Upload Document to Vector DB' to chunk and embed documents into vector search.",
+          "Upload Files: Click 'Upload Document to Vector DB' to select a file from your computer and embed it into vector search.",
           "Query Embeddings: Type a factual question in the query bar (e.g. 'What are the security vault specs?').",
           "Inspect Citations: View similarity scores (e.g. 94.8% match) and original text snippets cited from your documents."
         ]}
@@ -107,7 +126,7 @@ export default function KnowledgePage() {
         </div>
 
         <button
-          onClick={handleUploadSample}
+          onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
           className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 disabled:opacity-50"
         >
@@ -179,7 +198,7 @@ export default function KnowledgePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-mono">
-              {documents.map((doc: any) => (
+              {filteredDocs.map((doc: any) => (
                 <tr key={doc.id} className="hover:bg-slate-900/50 transition-colors">
                   <td className="py-3 font-medium text-white flex items-center gap-2">
                     <FileCode className="w-4 h-4 text-cyan-400" />

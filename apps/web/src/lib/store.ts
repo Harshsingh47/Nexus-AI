@@ -112,34 +112,61 @@ const DEFAULT_AGENTS: AgentConfig[] = [
   }
 ];
 
+// Helper to safely load initial state from localStorage on client side
+function loadSavedAuth() {
+  if (typeof window === 'undefined') return { user: null, token: null, credits: 50, plan: SubscriptionPlanTier.FREE };
+  try {
+    const token = localStorage.getItem('nexusmind_token');
+    const userStr = localStorage.getItem('nexusmind_user');
+    const savedCredits = localStorage.getItem('nexusmind_credits');
+    const savedPlan = localStorage.getItem('nexusmind_plan');
+
+    return {
+      user: userStr ? JSON.parse(userStr) : null,
+      token: token || null,
+      credits: savedCredits ? parseInt(savedCredits, 10) : 50,
+      plan: (savedPlan as SubscriptionPlanTier) || SubscriptionPlanTier.FREE
+    };
+  } catch (e) {
+    return { user: null, token: null, credits: 50, plan: SubscriptionPlanTier.FREE };
+  }
+}
+
+const initialSaved = loadSavedAuth();
+
 export const useAppStore = create<AppState>((set, get) => ({
-  user: {
-    id: 'usr-demo-admin-01',
-    email: 'admin@nexusmind.ai',
-    fullName: 'Enterprise Admin',
-    role: 'ORG_ADMIN'
-  },
-  token: 'mock-jwt-token-2026',
+  user: initialSaved.user,
+  token: initialSaved.token,
 
   setUser: (user, token) => {
     set({ user, token: token || null });
-    if (token) {
-      localStorage.setItem('nexusmind_token', token);
-    } else {
-      localStorage.removeItem('nexusmind_token');
+    if (typeof window !== 'undefined') {
+      if (token) {
+        localStorage.setItem('nexusmind_token', token);
+      } else {
+        localStorage.removeItem('nexusmind_token');
+      }
+      if (user) {
+        localStorage.setItem('nexusmind_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('nexusmind_user');
+      }
     }
   },
 
   logout: () => {
     set({ user: null, token: null });
-    localStorage.removeItem('nexusmind_token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('nexusmind_token');
+      localStorage.removeItem('nexusmind_user');
+    }
   },
 
   selectedModel: 'gpt-4o',
   setSelectedModel: (model) => set({ selectedModel: model }),
 
-  credits: 50,
-  activePlan: SubscriptionPlanTier.FREE,
+  credits: initialSaved.credits,
+  activePlan: initialSaved.plan,
   dailyFreeCredit: 50,
   totalExecutions: 14,
 
@@ -153,6 +180,10 @@ export const useAppStore = create<AppState>((set, get) => ({
           activePlan: data.activePlan || SubscriptionPlanTier.FREE,
           dailyFreeCredit: data.dailyFreeCredit || 50
         });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('nexusmind_credits', String(data.balance));
+          localStorage.setItem('nexusmind_plan', data.activePlan || SubscriptionPlanTier.FREE);
+        }
       }
     } catch (e) {
       // Standalone mode fallback
@@ -160,18 +191,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   deductCredits: (amount: number) => {
-    set(state => ({ 
-      credits: Math.max(0, state.credits - amount),
-      totalExecutions: state.totalExecutions + 1
-    }));
+    set(state => {
+      const newCredits = Math.max(0, state.credits - amount);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('nexusmind_credits', String(newCredits));
+      }
+      return { 
+        credits: newCredits,
+        totalExecutions: state.totalExecutions + 1
+      };
+    });
   },
 
   setPlan: (plan: SubscriptionPlanTier) => {
     const config = SUBSCRIPTION_TIERS_CONFIG[plan];
-    set(state => ({
-      activePlan: plan,
-      credits: state.credits + (config ? config.creditsAllocated : 0)
-    }));
+    set(state => {
+      const newCredits = state.credits + (config ? config.creditsAllocated : 0);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('nexusmind_credits', String(newCredits));
+        localStorage.setItem('nexusmind_plan', plan);
+      }
+      return {
+        activePlan: plan,
+        credits: newCredits
+      };
+    });
   },
 
   agents: DEFAULT_AGENTS,

@@ -24,7 +24,7 @@ export default function SignupPage() {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName })
+        body: JSON.stringify({ email, password, fullName, orgName })
       });
       const data = await res.json();
       setUser(data.user || { id: `usr-${Date.now()}`, email, fullName, role: 'ORG_ADMIN' }, data.token || 'token-2026');
