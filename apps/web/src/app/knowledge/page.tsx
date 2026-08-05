@@ -26,12 +26,7 @@ export default function KnowledgePage() {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  const triggerFilePicker = () => {
-    const el = document.getElementById('vector-doc-file-picker') as HTMLInputElement;
-    if (el) el.click();
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -91,15 +86,6 @@ export default function KnowledgePage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Explicit Hidden File Input */}
-      <input
-        type="file"
-        id="vector-doc-file-picker"
-        onChange={handleFileSelect}
-        accept=".pdf,.doc,.docx,.txt,.csv,.json,.md"
-        style={{ display: 'none' }}
-      />
-
       {/* Instruction Banner */}
       <InstructionBanner
         title="Knowledge Base (RAG Studio)"
@@ -124,15 +110,23 @@ export default function KnowledgePage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={triggerFilePicker}
-          disabled={isUploading}
-          className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 disabled:opacity-50 cursor-pointer"
-        >
-          {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          <span>Upload Document to Vector DB</span>
-        </button>
+        {/* Native File Input Label Button */}
+        <div>
+          <input
+            type="file"
+            id="doc-upload-file-input"
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,.txt,.csv,.json,.md"
+            className="hidden"
+          />
+          <label
+            htmlFor="doc-upload-file-input"
+            className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 cursor-pointer"
+          >
+            {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            <span>Upload Document to Vector DB</span>
+          </label>
+        </div>
       </div>
 
       {/* Vector Search Query Bar */}
@@ -186,8 +180,15 @@ export default function KnowledgePage() {
         </h3>
 
         {filteredDocs.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 text-xs font-mono">
-            No documents uploaded yet. Click "Upload Document to Vector DB" to add local files.
+          <div className="p-12 text-center text-slate-400 text-xs font-mono space-y-3 border border-dashed border-slate-800 rounded-2xl">
+            <p>No documents uploaded yet.</p>
+            <label
+              htmlFor="doc-upload-file-input"
+              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-cyan-600/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-600/30 font-semibold cursor-pointer transition-all"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Select File to Upload</span>
+            </label>
           </div>
         ) : (
           <div className="overflow-x-auto">
