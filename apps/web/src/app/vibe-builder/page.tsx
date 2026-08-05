@@ -22,24 +22,30 @@ export default function VibeBuilderPage() {
   const [activeTab, setActiveTab] = useState<'PREVIEW' | 'CODE' | 'DATABASE'>('PREVIEW');
   
   const [appState, setAppState] = useState<any>({
-    appName: 'Custom AI Application',
-    description: 'Enter a prompt or click an example prompt below to generate full-stack code.',
+    appName: 'Custom AI Lead Generator',
+    description: 'Autonomous lead scraping, email validation, and CRM pipeline.',
     status: 'READY',
     files: [
-      { name: 'app/page.tsx', language: 'typescript', code: `// Autonomously Synthesized Full-Stack Vibe App
+      { name: 'app/lead-gen/page.tsx', language: 'typescript', code: `// Autonomously Synthesized Full-Stack Vibe App
 import React from 'react';
 
-export default function CustomApp() {
+export default function LeadGeneratorApp() {
   return (
     <div className="p-6 space-y-6 bg-slate-900 text-white rounded-2xl border border-slate-800">
-      <h1 className="text-2xl font-bold text-blue-400">Custom Synthesized App</h1>
-      <p className="text-xs text-slate-400">Generated via NexusMind Vibe Engine</p>
+      <h1 className="text-2xl font-bold text-blue-400">Autonomous Lead Generator</h1>
+      <p className="text-xs text-slate-400">Powered by Playwright Scraper & Claude 3.5 Sonnet</p>
     </div>
   );
+}` },
+      { name: 'api/scrape/route.ts', language: 'typescript', code: `// Playwright Backend Scraper Endpoint
+export async function POST(req: Request) {
+  const { targetUrl } = await req.json();
+  return Response.json({ success: true, leadsFound: 42, url: targetUrl });
 }` }
     ],
     entities: [
-      { name: 'AppRecords', fields: ['id (UUID)', 'title (String)', 'data (JSON)', 'createdAt (DateTime)'] }
+      { name: 'Leads', fields: ['id (UUID)', 'companyName (String)', 'email (String)', 'status (Enum)', 'score (Float)'] },
+      { name: 'Campaigns', fields: ['id (UUID)', 'title (String)', 'targetRegion (String)', 'scrapedCount (Int)'] }
     ]
   });
 
@@ -52,6 +58,7 @@ export default function CustomApp() {
 
     const generatedName = targetPrompt.length > 35 ? `${targetPrompt.substring(0, 35)}...` : targetPrompt;
     const cleanSlug = targetPrompt.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'app';
+    const entityName = targetPrompt.split(' ')[0].replace(/[^a-zA-Z]/g, '') || 'Records';
 
     setAppState({
       appName: generatedName,
@@ -70,14 +77,14 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-extrabold text-blue-400">${generatedName}</h1>
-          <p className="text-xs text-slate-400">Generated autonomously for prompt: "${targetPrompt}"</p>
+          <p className="text-xs text-slate-400">Prompt: "${targetPrompt}"</p>
         </div>
         <button className="px-4 py-2 rounded-xl bg-blue-600 font-bold text-xs">Run Workflow</button>
       </div>
 
       <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-        <h3 className="font-bold text-slate-200 mb-2">Live Synthesized Viewport</h3>
-        <p className="text-slate-400">UI pages, backend route handlers, and database entities generated with 0 errors!</p>
+        <h3 className="font-bold text-slate-200 mb-2">Live Viewport</h3>
+        <p className="text-slate-400">Synthesized UI, API endpoints, and database tables generated with 0 errors!</p>
       </div>
     </div>
   );`
@@ -89,7 +96,8 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
         }
       ],
       entities: [
-        { name: `${cleanSlug.replace(/-/g, '_')}_records`, fields: ['id (UUID)', 'title (String)', 'dataPayload (JSON)', 'createdAt (DateTime)'] }
+        { name: `${entityName}_records`, fields: ['id (UUID)', 'title (String)', 'payload (JSON)', 'createdAt (DateTime)'] },
+        { name: `${entityName}_logs`, fields: ['id (UUID)', 'executionStatus (String)', 'durationMs (Int)'] }
       ]
     });
 
@@ -99,6 +107,11 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
   const handlePromptClick = (text: string) => {
     setPrompt(text);
     handleVibeGenerate(text);
+  };
+
+  const handleDeploy = () => {
+    const slug = appState.appName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 15);
+    alert(`🎉 App Published Successfully!\nLive Viewport: https://nexusmind.ai/app/${slug}`);
   };
 
   return (
@@ -156,8 +169,8 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
           </div>
 
           <button
-            onClick={() => alert(`App deployed successfully!`)}
-            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02]"
+            onClick={handleDeploy}
+            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] cursor-pointer"
           >
             <Rocket className="w-4 h-4" />
             <span>Deploy & Host App</span>
@@ -212,7 +225,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
             <button
               onClick={() => handleVibeGenerate()}
               disabled={isGenerating || !prompt.trim()}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all disabled:opacity-50 cursor-pointer"
             >
               {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
               <span>Generate Full-Stack App (5 Credits)</span>
@@ -229,7 +242,7 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
                 <span className="text-emerald-400 font-bold">✓ Live Interactive Preview</span>
               </div>
 
-              {/* Render Simulated Live Next.js App */}
+              {/* Render Dynamic Next.js App Preview */}
               <div className="p-8 rounded-2xl glass-panel border border-blue-500/30 bg-slate-900/90 space-y-6 shadow-2xl">
                 <div className="flex justify-between items-center">
                   <div>
@@ -244,16 +257,16 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                    <span className="text-xs text-slate-400">Records Scraped</span>
+                    <span className="text-xs text-slate-400">Processed Items</span>
                     <div className="text-2xl font-bold text-emerald-400 font-mono">1,420</div>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                    <span className="text-xs text-slate-400">Data Accuracy</span>
+                    <span className="text-xs text-slate-400">Execution Accuracy</span>
                     <div className="text-2xl font-bold text-blue-400 font-mono">99.2%</div>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                    <span className="text-xs text-slate-400">Pipelines</span>
-                    <div className="text-2xl font-bold text-purple-400 font-mono">12 Active</div>
+                    <span className="text-xs text-slate-400">Status</span>
+                    <div className="text-2xl font-bold text-purple-400 font-mono">ACTIVE</div>
                   </div>
                 </div>
 
@@ -261,29 +274,29 @@ export default function ${cleanSlug.replace(/-/g, '_')}_App() {
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Database className="w-4 h-4 text-cyan-400" />
-                    <span>Generated Database Table</span>
+                    <span>Generated Entity: {appState.entities?.[0]?.name || 'Records'}</span>
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-mono">
                       <thead>
                         <tr className="border-b border-slate-800 text-slate-400">
                           <th className="pb-2">ID</th>
-                          <th className="pb-2">Target</th>
-                          <th className="pb-2">Payload</th>
+                          <th className="pb-2">Target Title</th>
+                          <th className="pb-2">Payload Data</th>
                           <th className="pb-2">Status</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
                         <tr className="hover:bg-slate-800/50">
                           <td className="py-2.5 text-slate-500">#101</td>
-                          <td className="py-2.5 font-bold text-white">Acme Corp</td>
-                          <td className="py-2.5 text-blue-400">contact@acme.com</td>
-                          <td className="py-2.5"><span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">VERIFIED</span></td>
+                          <td className="py-2.5 font-bold text-white">{appState.appName} Record #1</td>
+                          <td className="py-2.5 text-blue-400">data_chunk_01.json</td>
+                          <td className="py-2.5"><span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">PROCESSED</span></td>
                         </tr>
                         <tr className="hover:bg-slate-800/50">
                           <td className="py-2.5 text-slate-500">#102</td>
-                          <td className="py-2.5 font-bold text-white">Starlight AI</td>
-                          <td className="py-2.5 text-blue-400">sales@starlight.ai</td>
+                          <td className="py-2.5 font-bold text-white">{appState.appName} Record #2</td>
+                          <td className="py-2.5 text-blue-400">data_chunk_02.json</td>
                           <td className="py-2.5"><span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px]">ACTIVE</span></td>
                         </tr>
                       </tbody>

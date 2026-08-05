@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Database, 
-  Upload, 
   Search, 
   FileText, 
   CheckCircle2, 
@@ -40,7 +39,7 @@ export default function KnowledgePage() {
       chunkCount: Math.max(12, Math.ceil(file.size / 1024)),
       vectorDbStatus: 'READY' as const,
       createdAt: new Date().toISOString(),
-      metadata: { author: 'User File Ingestion' }
+      metadata: { author: 'User Ingestion' }
     };
 
     addDocument(newDoc);
@@ -91,7 +90,7 @@ export default function KnowledgePage() {
         title="Knowledge Base (RAG Studio)"
         description="Upload documents (PDF, Word, Excel, CSV, Repos) to index into the vector database for factual AI agent lookup."
         steps={[
-          "Upload Files: Click 'Upload Document to Vector DB' to select a file from your computer and embed it into vector search.",
+          "Upload Files: Click 'Choose File' below to pick a file from your computer and embed it into vector search.",
           "Query Embeddings: Type a factual question in the query bar (e.g. 'What are the security vault specs?').",
           "Inspect Citations: View similarity scores (e.g. 94.8% match) and original text snippets cited from your documents."
         ]}
@@ -110,22 +109,15 @@ export default function KnowledgePage() {
           </p>
         </div>
 
-        {/* Native File Input Label Button */}
-        <div>
+        {/* Direct Styled File Input Button */}
+        <div className="flex items-center gap-2">
           <input
             type="file"
-            id="doc-upload-file-input"
             onChange={handleFileChange}
             accept=".pdf,.doc,.docx,.txt,.csv,.json,.md"
-            className="hidden"
+            className="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 cursor-pointer"
           />
-          <label
-            htmlFor="doc-upload-file-input"
-            className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-2 shadow-md shadow-cyan-600/30 transition-all shrink-0 cursor-pointer"
-          >
-            {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            <span>Upload Document to Vector DB</span>
-          </label>
+          {isUploading && <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin" />}
         </div>
       </div>
 
@@ -145,7 +137,7 @@ export default function KnowledgePage() {
           />
           <button
             onClick={handleVectorQuery}
-            className="py-2.5 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/30 transition-all shrink-0"
+            className="py-2.5 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/30 transition-all shrink-0 cursor-pointer"
           >
             <span>Query Embeddings</span>
           </button>
@@ -180,15 +172,9 @@ export default function KnowledgePage() {
         </h3>
 
         {filteredDocs.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs font-mono space-y-3 border border-dashed border-slate-800 rounded-2xl">
+          <div className="p-12 text-center text-slate-400 text-xs font-mono border border-dashed border-slate-800 rounded-2xl space-y-2">
             <p>No documents uploaded yet.</p>
-            <label
-              htmlFor="doc-upload-file-input"
-              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-cyan-600/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-600/30 font-semibold cursor-pointer transition-all"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Select File to Upload</span>
-            </label>
+            <p className="text-slate-500 text-[11px]">Use the file picker above to select and index PDFs, text files, or CSVs into vector storage.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
