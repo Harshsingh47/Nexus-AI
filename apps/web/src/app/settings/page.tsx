@@ -12,7 +12,7 @@ export default function SettingsPage() {
         title="Settings & Key Storage Vault"
         description="Manage provider API keys (OpenAI, Anthropic, Gemini), user workspace preferences, and workspace audit logs."
         steps={[
-          "Encrypted Key Storage: View active LLM API keys formatted with AES-256 symmetric encryption storage.",
+          "Encrypted Key Storage: View active LLM API keys formatted with symmetric vault encryption storage.",
           "Audit Activity: Monitor login timestamps, client IP addresses, and workflow credit consumption logs.",
           "In-Memory Decryption: API keys are decrypted only in memory during active workflow execution steps."
         ]}
@@ -38,7 +38,7 @@ export default function SettingsPage() {
         <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <Lock className="w-5 h-5 text-blue-400" />
-            <span>API Key Storage Vault (AES-256 Enabled)</span>
+            <span>API Key Storage Vault (Secure Encryption)</span>
           </h3>
 
           <div className="space-y-3 font-mono text-xs">
@@ -47,7 +47,7 @@ export default function SettingsPage() {
                 <div className="font-bold text-white">OPENAI_API_KEY</div>
                 <div className="text-[10px] text-slate-500">sk-proj-••••••••••••••••3A9x</div>
               </div>
-              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">AES-256 Active</span>
+              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Vault Protected</span>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
@@ -55,7 +55,7 @@ export default function SettingsPage() {
                 <div className="font-bold text-white">ANTHROPIC_API_KEY</div>
                 <div className="text-[10px] text-slate-500">sk-ant-••••••••••••••••7F8e</div>
               </div>
-              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">AES-256 Active</span>
+              <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Vault Protected</span>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
   Search, 
   Coins, 
@@ -18,6 +18,7 @@ import { useAppStore } from '@/lib/store';
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { 
     credits, 
     activePlan, 
@@ -35,6 +36,11 @@ export function Header() {
   useEffect(() => {
     fetchBilling();
   }, [fetchBilling]);
+
+  // Hide header completely on public pages
+  if (pathname === '/' || pathname === '/login' || pathname === '/signup') {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();

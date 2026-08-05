@@ -23,6 +23,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const { credits, activePlan, agents } = useAppStore();
 
+  // Hide sidebar completely on public pages
+  if (pathname === '/' || pathname === '/login' || pathname === '/signup') {
+    return null;
+  }
+
   const navItems = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Vibe App Builder', href: '/vibe-builder', icon: Wand2, badge: 'App Studio' },

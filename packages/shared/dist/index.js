@@ -79,7 +79,7 @@ exports.SUBSCRIPTION_TIERS_CONFIG = {
         billingCycle: 'monthly',
         creditsAllocated: 150000,
         dailyFreeCreditRefresh: 1000,
-        features: ['Custom Volume Credits', 'Dedicated Worker Nodes', 'SSO / SAML / Custom Vault', 'SOC2 / HIPAA / SLA Guarantee']
+        features: ['Custom Volume Credits', 'Dedicated Worker Nodes', 'SSO / SAML / Custom Vault', 'Dedicated Enterprise Support & 99.9% Uptime']
     }
 };
 var WorkflowNodeType;

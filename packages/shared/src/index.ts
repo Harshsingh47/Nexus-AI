@@ -87,7 +87,7 @@ export const SUBSCRIPTION_TIERS_CONFIG: Record<SubscriptionPlanTier, Subscriptio
     billingCycle: 'monthly',
     creditsAllocated: 150000,
     dailyFreeCreditRefresh: 1000,
-    features: ['Custom Volume Credits', 'Dedicated Worker Nodes', 'SSO / SAML / Custom Vault', 'SOC2 / HIPAA / SLA Guarantee']
+    features: ['Custom Volume Credits', 'Dedicated Worker Nodes', 'SSO / SAML / Custom Vault', 'Dedicated Enterprise Support & 99.9% Uptime']
   }
 };
 

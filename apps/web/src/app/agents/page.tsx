@@ -15,7 +15,7 @@ import { InstructionBanner } from '@/components/ui/InstructionBanner';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function AgentsPage() {
-  const { agents, fetchAgents, addAgent, deleteAgent } = useAppStore();
+  const { agents, fetchAgents, addAgent, deleteAgent, searchQuery } = useAppStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newAgentName, setNewAgentName] = useState('');
   const [newAgentRole, setNewAgentRole] = useState(AgentRoleType.DEVELOPER);
@@ -26,7 +26,8 @@ export default function AgentsPage() {
   }, [fetchAgents]);
 
   const handleCreateAgent = async () => {
-    if (!newAgentName || !newAgentPrompt) return;
+    if (!newAgentName.trim() || !newAgentPrompt.trim()) return;
+
     const newAgent = {
       id: `agent-${Date.now()}`,
       name: newAgentName,
@@ -42,21 +43,27 @@ export default function AgentsPage() {
       humanApprovalRequired: false
     };
 
+    addAgent(newAgent);
+    setIsCreating(false);
+    setNewAgentName('');
+    setNewAgentPrompt('');
+
     try {
       await fetch(`${API_BASE}/agents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAgent)
       }).catch(() => null);
-
-      addAgent(newAgent);
-      setIsCreating(false);
-      setNewAgentName('');
-      setNewAgentPrompt('');
     } catch (e) {
       console.error(e);
     }
   };
+
+  const filteredAgents = agents.filter(a =>
+    !searchQuery || 
+    a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    a.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -147,7 +154,7 @@ export default function AgentsPage() {
             </button>
             <button
               onClick={handleCreateAgent}
-              className="py-2 px-4 rounded-xl bg-blue-600 text-white text-xs font-semibold"
+              className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all"
             >
               Save Agent
             </button>
@@ -156,14 +163,14 @@ export default function AgentsPage() {
       )}
 
       {/* Agents Roster Grid or Empty State */}
-      {agents.length === 0 ? (
+      {filteredAgents.length === 0 ? (
         <div className="p-12 rounded-3xl glass-panel border border-slate-800 text-center space-y-4 max-w-xl mx-auto">
           <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
             <Bot className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-white">No AI Agents in Workspace</h3>
+          <h3 className="text-lg font-bold text-white">No AI Agents Match Search</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Your agent roster is currently empty. Create your first specialized AI agent worker to start orchestrating automated workflows.
+            Create your first specialized AI agent worker to start orchestrating automated workflows.
           </p>
           <button
             onClick={() => setIsCreating(true)}
@@ -175,7 +182,7 @@ export default function AgentsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agents.map((agent: any) => (
+          {filteredAgents.map((agent: any) => (
             <div key={agent.id} className="p-6 rounded-2xl glass-card border border-slate-800 hover:border-blue-500/40 space-y-4 flex flex-col justify-between relative group">
               <div>
                 <div className="flex items-start justify-between mb-3">
